@@ -63,6 +63,7 @@ namespace EncryptMessangerClient.ViewModel
                 }
             }
         }
+        //ошибка аутентификации, выводимая пользователю
         public string AuthError
         {
             get { return _authError; }
