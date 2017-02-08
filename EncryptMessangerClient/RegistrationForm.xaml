@@ -1,0 +1,41 @@
+﻿<Window x:Class="EncryptMessangerClient.RegistrationForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EncryptMessangerClient"
+        mc:Ignorable="d"
+        Title="RegistrationForm" Height="300" Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1.2*"></RowDefinition>
+            <RowDefinition Height="1.2*"></RowDefinition>
+            <RowDefinition Height="1.2*"></RowDefinition>
+            <RowDefinition Height="1*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Margin="5">
+            <Label  Content="Логин" ></Label>
+            <TextBox   x:Name="login" Margin="0,5,0,0"></TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Margin="5">
+            <Label  Content="Пароль" ></Label>
+            <PasswordBox Margin="0,5,0,0" x:Name="password"></PasswordBox>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Margin="5">
+            <Label  Content="Повторите пароль" ></Label>
+            <PasswordBox Margin="0,5,0,0" x:Name="passwordConfirm"></PasswordBox>
+        </StackPanel>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Margin="10" x:Name="registrationButton" Content="Зарегистрироваться"></Button>
+            <Button Grid.Column="1" Margin="10" x:Name="canselRegisrationButton" Content="Отмена"></Button>
+        </Grid>
+        
+    </Grid>
+</Window>

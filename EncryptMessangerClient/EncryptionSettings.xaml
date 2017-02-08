@@ -1,0 +1,23 @@
+﻿<Window x:Class="EncryptMessangerClient.EncryptionSettings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EncryptMessangerClient"
+        xmlns:vm ="clr-namespace:EncryptMessangerClient.ViewModel"
+        mc:Ignorable="d"
+        Title="Настройки безопасности" Height="168.667" Width="300">
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+    <Grid Height="270" VerticalAlignment="Top">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+            
+        <CheckBox x:Name="checkBox" Grid.Row="0" Content="Шифровать сообщения" HorizontalAlignment="Left" Margin="30,5,0,0" VerticalAlignment="Top" IsChecked="{Binding Encrypt}"/>
+        <CheckBox x:Name="checkBox1" Grid.Row="1" Content="Подписывать сообщения" HorizontalAlignment="Left" Margin="30,5,0,0" VerticalAlignment="Top" IsChecked="{Binding Sign}"/>
+
+    </Grid>
+</Window>
