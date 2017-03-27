@@ -1,4 +1,5 @@
 ﻿using EncryptMessangerClient.Events;
+using EncryptMessangerClient.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,28 +12,32 @@ namespace EncryptMessangerClient.ViewModel
 {
     class RegistrationViewModel : INotifyPropertyChanged
     {
-        private string _login;
-        private string _password;
+        /*private string _login;
+        private string _password;*/
         private string _passwordConfirm;
+        private string _error;
 
         public Command RegistrationCommand { get; set; }
         public Command CanselCommand { get; set; }
 
-        public event EventHandler<ClientAuthEventArgs> RegistrationEventHandler;
+        public event EventHandler<ClientRegistrationEventArgs> RegistrationEventHandler;
         public event EventHandler CanselEventHandler;
+
+        private RegistrationInfo _registrationInfo;
 
         public string Login
         {
             get
             {
-                return _login;
+                return _registrationInfo.Login;                
             }
 
             set
             {
-                if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_login))
+                if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_registrationInfo.Login))
                 {
-                    _login = value;
+                    _registrationInfo.Login = value;
+                    RegistrationCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -41,14 +46,15 @@ namespace EncryptMessangerClient.ViewModel
         {
             get
             {
-                return _password;
+                return _registrationInfo.Password;
             }
 
             set
             {
-                if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_password))
+                if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_registrationInfo.Password))
                 {
-                    _password = value;
+                    _registrationInfo.Password = value;
+                    RegistrationCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -65,7 +71,22 @@ namespace EncryptMessangerClient.ViewModel
                 if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_passwordConfirm))
                 {
                     _passwordConfirm = value;
+                    RegistrationCommand.RaiseCanExecuteChanged();
                 }
+            }
+        }
+
+        public string Error
+        {
+            get
+            {
+                return _error;
+            }
+
+            set
+            {
+                if(!value.Equals(_error)&&!String.IsNullOrEmpty(value))
+                _error = value;
             }
         }
 
@@ -77,16 +98,16 @@ namespace EncryptMessangerClient.ViewModel
 
         private void Registrate()
         {
-            RegistrationEventHandler?.Invoke(this, new ClientAuthEventArgs(_login, _password));
+            RegistrationEventHandler?.Invoke(this, new ClientRegistrationEventArgs(_registrationInfo));
         }
         private bool CanRegistrate()
         {
-            return (!String.IsNullOrWhiteSpace(_login)) && (!String.IsNullOrWhiteSpace(_password)) && 
+            return (!String.IsNullOrWhiteSpace(Login)) && (!String.IsNullOrWhiteSpace(Password)) && 
                 (!String.IsNullOrWhiteSpace(_passwordConfirm))&&(Password.Equals(_passwordConfirm));
         }
 
         private void Cansel()
-        {
+        {            
             CanselEventHandler?.Invoke(this, EventArgs.Empty);
         }
         private bool CanCansel()
@@ -98,6 +119,7 @@ namespace EncryptMessangerClient.ViewModel
         {
             RegistrationCommand = new Command(Registrate, CanRegistrate);
             CanselCommand = new Command(Cansel, CanCansel);
+            _registrationInfo = new RegistrationInfo();
         }
     }
 }

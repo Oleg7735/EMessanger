@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EncryptMessanger.dll.Messages;
-using EncryptMessanger.dll.DataBase.Repositories;
-using EncryptMessanger.dll.DataBase;
+/*using EncryptMessanger.dll.DataBase.Repositories;
+using EncryptMessanger.dll.DataBase;*/
 using System.Security.Cryptography;
 
 namespace EncryptMessanger.dll.Authentification
 {
+    public delegate bool UserPredicate(string login, byte[] password);
     public class Authentificator
     {
         
@@ -25,7 +26,7 @@ namespace EncryptMessanger.dll.Authentification
             return new byte[] { 1, 2, 3, 4, 5, 6, 6 };
         }
         //сравнивает заданные логин и пароль с логином и паролем, ханящимеся в базе данных
-        private bool CompareInfo(string login, byte[] password)
+        /*private bool CompareInfo(string login, byte[] password)
         {
             UserRepository ur = new UserRepository();
             Users user = ur.GetUserByLogin(login);
@@ -44,7 +45,7 @@ namespace EncryptMessanger.dll.Authentification
                 return true;
             }
             return false;
-        }
+        }*/
         //метод для аутентификации со стороны клиента
         public bool ClientAuth(MessageWriter messageWriter, MessageReader reader, string login, string password)
         {
@@ -85,8 +86,8 @@ namespace EncryptMessanger.dll.Authentification
             }
             return false;
         }
-        //метод для аутентификации со стороны клиента
-        public bool ServerAuth(MessageWriter messageWriter, MessageReader reader)
+        //метод для аутентификации со стороны сервера
+        public bool ServerAuth(MessageWriter messageWriter, MessageReader reader, UserPredicate CompareInfo)
         {
             
             Messages.Message message = reader.ReadNext();
@@ -98,7 +99,7 @@ namespace EncryptMessanger.dll.Authentification
                 }
                 else
                 {
-                    throw new Exception("Protocol error. AuthResponceMessage expected but " + message.Type.ToString("g") + "recived");
+                    throw new Exception("Protocol error. AuthResponceMessage expected but " + message.Type.ToString("g") + " recived");
                 }
                 return false;
             }
@@ -107,6 +108,7 @@ namespace EncryptMessanger.dll.Authentification
             if(CompareInfo(authResponse.Login, authResponse.Password))
             {
                 messageWriter.WriteMessage(new AuthSuccessMessage());
+                _login = authResponse.Login;
                 return true;
             }
             messageWriter.WriteMessage(new AuthErrorMessage("Неверный логин или пароль"));

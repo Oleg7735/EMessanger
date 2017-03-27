@@ -256,7 +256,7 @@ namespace EncryptMessangerClient.ViewModel
                 }
                 else
                 {
-                    throw new Exception("Current dialog not found");
+                    //throw new Exception("Current dialog not found");
                     return true;
                 }
             }

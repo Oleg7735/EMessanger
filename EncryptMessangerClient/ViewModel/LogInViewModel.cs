@@ -13,15 +13,17 @@ namespace EncryptMessangerClient.ViewModel
     {
         public event EventHandler<ClientAuthEventArgs> AuthClient;
         public event EventHandler CloseClient;
-        public event EventHandler<ClientRegistrationEventArgs> RegistrateClient;
+        public event EventHandler RegistrateClient;
         public Command ClientAuthCommand { get; private set; }
         public Command ClientCloseCommand { get; private set; }
+        public Command ClientRegistrateCommand { get; private set; }
 
         public LogInViewModel()
         {
             //инициализация команд аутентификации и выхода
             ClientAuthCommand = new Command(Auth, CanAuth);
             ClientCloseCommand = new Command(Exit,CanExit);
+            ClientRegistrateCommand = new Command(Registrate, CanRegistrate);
         }
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName]string propertyName = "")
@@ -98,7 +100,7 @@ namespace EncryptMessangerClient.ViewModel
         }
         private void Registrate()
         {
-
+            RegistrateClient?.Invoke(this, EventArgs.Empty);
         }
         private bool CanRegistrate()
         {

@@ -14,7 +14,7 @@ using EncryptMessanger.dll.Messages;
 using EncryptMessanger.dll.Encription;
 using EncryptMessanger.dll.Authentification;
 using EncryptMessangerClient.Events;
-
+using EncryptMessangerClient.Model;
 
 namespace EncryptMessangerClient
 {
@@ -22,7 +22,7 @@ namespace EncryptMessangerClient
 
     public class Client
     {
-        private string _serverIP = "192.168.56.1";
+        private string _serverIP;// = "192.168.0.100";
         private int _serverPort = 11000;
         private TcpClient _client = new TcpClient();
         private MessageWriter _messageWriter;
@@ -30,23 +30,30 @@ namespace EncryptMessangerClient
         private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         public EventHandler<NewMessageEventArgs> Resive;
         public EventHandler<AuthErrorEventArgs> AuthError;
+        public EventHandler<RegistrationErrorEventArgs> RegistrationError;
+        public EventHandler<RegistrationSuccessEventArgs> RegistrationSuccess;
         public EventHandler<ClientStatusOnlineEventArgs> ClientOnline;
         public EventHandler<ClientStatusExitEventArgs> ClientExit;
         public GetDialogEncryptionSettings GetDialogSettings;
         public EventHandler<EncryptionSettingsEventArgs> EncryptionSettingsChanged;
+        //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
+        
+        private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
+        private string _currentUserLogin = "user2";
+        private string _currentUserPassword = "222";
+        private Queue<TextMessage> _messageQueue = new Queue<TextMessage>();
+        private bool isLocked = false;
+
+        //private List<Message> _messageList = new List<Message>();
         public string Login
         {
             get { return _currentUserLogin; }
         }
 
-        private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
-        private string _currentUserLogin = "user2";
-        private string _currentUserPassword = "222";
-        private Queue<TextMessage> _messageQueue = new Queue<TextMessage>();
-        //private List<Message> _messageList = new List<Message>();
-
         public Client()
         {
+            _serverIP = GetServerIp();
+
             ConnectToServer();
 
             _messageWriter = new MessageWriter(_client.GetStream());
@@ -251,7 +258,14 @@ namespace EncryptMessangerClient
         //    }
         //    _messageWriter.WriteMessage(message);
         //}
-        private bool isLocked = false;
+        private string GetServerIp()
+        {
+            String strHostName = Dns.GetHostName();
+            IPHostEntry iphostentry = Dns.GetHostEntry(strHostName);
+            
+            
+            return iphostentry.AddressList[6].ToString();
+        }
         private void LockClient()
         {
             isLocked = true;
@@ -305,6 +319,23 @@ namespace EncryptMessangerClient
         {
             SetSessionEncrSettings( dialog, useSign, useEncrypt);
             _messageWriter.WriteMessage(new DialogEncryptionSettingsMessage(dialog, _currentUserLogin,useSign,useEncrypt));
+        }
+        public bool RegistrateAntAuth(RegistrationInfo registrationInfo)
+        {
+            string login = registrationInfo.Login;
+            string password = registrationInfo.Password;
+
+            ClientRegistrator registrator = new ClientRegistrator();
+            if(registrator.Registrate(_messageWriter, _messageReder, login, password))
+            {
+                RegistrationSuccess?.Invoke(this, new RegistrationSuccessEventArgs(login));
+                return true;
+            }
+            else
+            {
+                RegistrationError?.Invoke(this, new RegistrationErrorEventArgs(registrator.LastError));
+                return false;
+            }
         }
         public void Stop()
         {

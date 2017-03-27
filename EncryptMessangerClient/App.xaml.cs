@@ -23,6 +23,9 @@ namespace EncryptMessangerClient
         public Client CurrentClient { get { return _client; } }
         private AuthWindow _logInForm;
         private EncryptionSettings _encrytionSettingsForm;
+        private RegistrationForm _registrationWindow;
+        private RegistrationViewModel _registrationViewModel;
+
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -33,6 +36,8 @@ namespace EncryptMessangerClient
             _client.ClientExit = OnClientExit;
             _client.GetDialogSettings = new GetDialogEncryptionSettings(GetDialogSettingsFromVm);
             _client.EncryptionSettingsChanged += OnEncryptionSettingChanged;
+            _client.RegistrationError += OnRegistrationError;
+            _client.RegistrationSuccess += OnRegistrationSuccess;
             MainWindow mainWindow = new MainWindow();
             MainViewModel vm = mainWindow.DataContext as MainViewModel;
             vm.MessageSend += SendMessage;
@@ -61,10 +66,13 @@ namespace EncryptMessangerClient
             LogInViewModel logvm = _logInForm.DataContext as LogInViewModel;
             logvm.AuthClient += OnClientAuthRequest;
             logvm.CloseClient += MainWindow_Closed;
+            logvm.RegistrateClient += OpenRegstrationWindow;
+
 
             _logInForm.Show();
 
         }
+        
         private void Client_NewMessage(object sender, NewMessageEventArgs e)
         {
             MainViewModel vm = null;
@@ -96,6 +104,14 @@ namespace EncryptMessangerClient
         }
         private void MainWindow_Closed(object sender, EventArgs e)
         {
+            if(_logInForm!=null)
+            {
+                _logInForm.Close();
+            }
+            if (_registrationWindow != null)
+            {
+                _registrationWindow.Close();
+            }
             _client.Stop();
             Shutdown();
         }
@@ -104,27 +120,33 @@ namespace EncryptMessangerClient
             if (_client.Auth(e.Login, e.Password))
             {
                 _logInForm.Hide();
-                MainWindow.Show();
-
-                MainViewModel vm = null;
-                Dispatcher.Invoke(() =>
-                {
-                    vm = MainWindow.DataContext as MainViewModel;
-                });
-
-                if (vm != null)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        //vm.MessageBox = e.Message;
-
-                        //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
-                        vm.CurrentUserLogin = e.Login;
-                    });
-                }
+                StartMainWindow(e.Login);
                 await _client.StartAsync();
             }
         }
+
+        private void StartMainWindow(string login)
+        {
+            MainWindow.Show();
+
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+            });
+
+            if (vm != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    //vm.MessageBox = e.Message;
+
+                    //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
+                    vm.CurrentUserLogin = login;
+                });
+            }
+        }
+
         private void OnClientAuthError(object sender, AuthErrorEventArgs error)
         {
             LogInViewModel vm = _logInForm.DataContext as LogInViewModel;
@@ -223,13 +245,41 @@ namespace EncryptMessangerClient
             }
         }
 
-        private void OnRegistration(object sender, ClientAuthEventArgs e)
+        private void OnRegistrationError(Object sender, RegistrationErrorEventArgs e)
         {
-
+            _registrationViewModel.Error = e.ErrorDescription;
+        }
+        private void OnRegistrationSuccess(Object sender, RegistrationSuccessEventArgs e)
+        {
+            _registrationWindow.Hide();
+            _logInForm.Hide();
+            StartMainWindow(e.Login);
+        }
+        //событие запроса на регистрацию на сервере от RegistrationViewModel
+        private void OnRegistration(object sender, ClientRegistrationEventArgs e)
+        {
+            _client.RegistrateAntAuth(e.GetRegistrationInfo());
+        }
+        //событие отмены регистрации от RegistrationViewModel
+        private void OnRegistrationCanseled(object sender, EventArgs e )
+        {
+            if(_registrationWindow!=null)
+            {
+                _registrationWindow.Close();
+            }
         }
         private void OnEncryptionSettingChangedByUser(object sender, EncryptionSettingsEventArgs e)
         {
             _client.ChangeEncryptionSettings(e.Dialog,e.Sign,e.Encrypt);
+        }
+        //обрабатывает событие начала регистрации от LogInViewModel. Запускает флрму регистрации
+        private void OpenRegstrationWindow(object sender, EventArgs e)
+        {
+            _registrationWindow = new RegistrationForm();
+            _registrationViewModel = _registrationWindow.DataContext as RegistrationViewModel;
+            _registrationViewModel.RegistrationEventHandler += OnRegistration;
+            _registrationViewModel.CanselEventHandler += OnRegistrationCanseled;
+            _registrationWindow.ShowDialog();
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

@@ -41,6 +41,6 @@
 
         </Grid>
         <Label x:Name="erorLabel"  Content="{Binding AuthError}" HorizontalAlignment="Stretch" Margin="30,10,30,5" Grid.Row="4" VerticalAlignment="Top" Foreground="Red"/>
-        <Button x:Name="registrationButton" Background="LightYellow" Content="Регистрация" Grid.Row="6" Margin='30,10,30,10'></Button>
+        <Button x:Name="registrationButton" Command="{Binding ClientRegistrateCommand}" Background="LightYellow" Content="Регистрация" Grid.Row="6" Margin='30,10,30,10'></Button>
     </Grid>
 </Window>

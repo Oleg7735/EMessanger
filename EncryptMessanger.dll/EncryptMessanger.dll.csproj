@@ -61,19 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Authentification\Authentificator.cs" />
-    <Compile Include="Database1DataSet.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Database1DataSet.xsd</DependentUpon>
-    </Compile>
-    <Compile Include="DataBase\Data.designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Data.dbml</DependentUpon>
-    </Compile>
-    <Compile Include="DataBase\Repositories\DialogRepository.cs" />
-    <Compile Include="DataBase\Repositories\IRepository.cs" />
-    <Compile Include="DataBase\Repositories\UserRepository.cs" />
+    <Compile Include="Authentification\ClientRegistrator.cs" />
+    <Compile Include="Authentification\ServerRegistrationHandler.cs" />
     <Compile Include="Encription\ClientClientEncryptedSession.cs" />
     <Compile Include="Encription\EncryptionProvider.cs" />
     <Compile Include="MessageAtribute.cs" />
@@ -113,32 +102,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Database1.mdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Database1_log.ldf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <DependentUpon>Database1.mdf</DependentUpon>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
-    <None Include="Database1DataSet.xsc">
-      <DependentUpon>Database1DataSet.xsd</DependentUpon>
-    </None>
-    <None Include="Database1DataSet.xsd">
-      <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>Database1DataSet.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Database1DataSet.xss">
-      <DependentUpon>Database1DataSet.xsd</DependentUpon>
-    </None>
-    <None Include="DataBase\Data.dbml">
-      <Generator>MSLinqToSQLGenerator</Generator>
-      <LastGenOutput>Data.designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -160,11 +124,6 @@
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DataBase\Data.dbml.layout">
-      <DependentUpon>Data.dbml</DependentUpon>
-    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

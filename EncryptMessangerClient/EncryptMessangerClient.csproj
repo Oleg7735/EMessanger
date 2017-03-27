@@ -87,8 +87,11 @@
     <Compile Include="Events\ExportKeysEventArgs.cs" />
     <Compile Include="Events\MessageSendEventArgs.cs" />
     <Compile Include="Events\NewMessageEventArgs.cs" />
+    <Compile Include="Events\RegistrationErrorEventArgs.cs" />
+    <Compile Include="Events\RegistrationSuccessEventArgs.cs" />
     <Compile Include="Model\Dialog.cs" />
     <Compile Include="Model\DialogMessage.cs" />
+    <Compile Include="Model\RegistrationInfo.cs" />
     <Compile Include="RegistrationForm.xaml.cs">
       <DependentUpon>RegistrationForm.xaml</DependentUpon>
     </Compile>

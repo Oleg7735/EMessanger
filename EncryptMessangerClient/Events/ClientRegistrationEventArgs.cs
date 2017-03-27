@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessangerClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,24 +7,28 @@ using System.Threading.Tasks;
 
 namespace EncryptMessangerClient.Events
 {
-    class ClientRegistrationEventArgs
+    public class ClientRegistrationEventArgs
     {
-        private string _login;
-        private string _password;
+        /*private string _login;
+        private string _password;*/
+        private RegistrationInfo _registrationInfo;
 
         public string Login
         {
-            get { return _login; }
+            get { return _registrationInfo.Login; }
 
         }
         public string Password
         {
-            get { return _password; }
+            get { return _registrationInfo.Password; }
         }
-        public ClientRegistrationEventArgs(string login, string password)
+        public ClientRegistrationEventArgs(RegistrationInfo info)
         {
-            _login = login;
-            _password = password;
+            _registrationInfo = info;
+        }
+        public RegistrationInfo GetRegistrationInfo()
+        {
+            return _registrationInfo;
         }
     }
 }
