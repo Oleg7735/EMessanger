@@ -38,6 +38,7 @@ namespace EncryptMessangerClient.ViewModel
                 {
                     _registrationInfo.Login = value;
                     RegistrationCommand.RaiseCanExecuteChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -55,6 +56,7 @@ namespace EncryptMessangerClient.ViewModel
                 {
                     _registrationInfo.Password = value;
                     RegistrationCommand.RaiseCanExecuteChanged();
+                    OnPropertyChanged();
                 }
             }
         }
@@ -71,7 +73,9 @@ namespace EncryptMessangerClient.ViewModel
                 if (!String.IsNullOrWhiteSpace(value) && !value.Equals(_passwordConfirm))
                 {
                     _passwordConfirm = value;
+                    OnPropertyChanged();
                     RegistrationCommand.RaiseCanExecuteChanged();
+
                 }
             }
         }
@@ -85,8 +89,13 @@ namespace EncryptMessangerClient.ViewModel
 
             set
             {
-                if(!value.Equals(_error)&&!String.IsNullOrEmpty(value))
-                _error = value;
+                if (!value.Equals(_error) && !String.IsNullOrEmpty(value))
+                {
+                    _error = value;
+                    OnPropertyChanged();
+                }
+
+
             }
         }
 

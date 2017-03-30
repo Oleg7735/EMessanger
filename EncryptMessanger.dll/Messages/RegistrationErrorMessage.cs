@@ -11,6 +11,7 @@ namespace EncryptMessanger.dll.Messages
         public RegistrationErrorMessage(string errorText)
         {
             setAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(errorText)));
+            _type = MessageType.RegistrationErrorMessage;
         }
         public RegistrationErrorMessage()
         {

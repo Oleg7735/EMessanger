@@ -80,6 +80,7 @@
     <Compile Include="Messages\CreateCryptoSessionRequest.cs" />
     <Compile Include="Messages\CreateCryptoSessionResponse.cs" />
     <Compile Include="Messages\DialogEncryptionSettingsMessage.cs" />
+    <Compile Include="Messages\DialogsRequestMessage.cs" />
     <Compile Include="Messages\EndStreamMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ProcessedMessage.cs" />
@@ -97,6 +98,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="SendibleData\DialogSendibleInfo.cs" />
+    <Compile Include="SendibleData\ISendibleData.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />
   </ItemGroup>

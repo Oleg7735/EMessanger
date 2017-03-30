@@ -40,7 +40,12 @@ namespace EncryptMessanger.dll.Authentification
             byte[] password = md5.ComputeHash(Encoding.UTF8.GetBytes(stringPassword));
             writer.WriteMessage(new RegistrationMessage(login, password));
             Message responceMessage = reader.ReadNext();
-            switch(responceMessage.Type)
+            if(responceMessage.Type != MessageType.AuthMessage)
+            {
+                throw new ArgumentException("Protocol error! Auth message expected? but "+responceMessage.Type.ToString()+" received");
+            }
+            responceMessage = reader.ReadNext();
+            switch (responceMessage.Type)
             {
                 case MessageType.RegistrationSuccessMessage:
                     {

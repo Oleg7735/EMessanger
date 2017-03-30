@@ -26,6 +26,7 @@ namespace EncryptMessanger.dll
             _name = name;
             _value = value;
         }
+        
         public override bool Equals(object other)
         {
             if (other == null)

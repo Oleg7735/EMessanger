@@ -4,16 +4,33 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+public enum MessageType
+{
+    StartStreamMessage, EndStreamMessage, TextMessage, AuthMessage,
+    AuthResponceMessage, AuthSuccessMessage, PublicKeyMessage, SymKeyMessage,
+    ProcessedMessage, AbstractMessage, AuthErrorMessage, ClientPublicKeyMessage,
+    ClientSymKeyMessage, CreateCryptoSessionRequest, CreateCryptoSessionResponse,
+    ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
+    DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
+    DialogsRequestMessage, DialogResponceMessage
+};
+public enum Atribute
+{
+    Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
+    UseEncryption, UseSignature, DialogInfo
+};
 namespace EncryptMessanger.dll.Messages
 {
-    public class Message
+    public class Message:ISendibleData
     {
         protected List<MessageAtribute> _atributes = new List<MessageAtribute>();
         protected MessageType _type;
         protected string _tag;
 
-
+        protected void AddAtribute(MessageAtribute messageAtribute)
+        {
+            _atributes.Add(messageAtribute);
+        }
         protected void setAtributeValue(MessageAtribute messageAtribute)
         {
             for (int i = 0; i < _atributes.Count; i++)
@@ -28,7 +45,7 @@ namespace EncryptMessanger.dll.Messages
                 }
 
             }
-            _atributes.Add(messageAtribute);
+            AddAtribute(messageAtribute);
         }
         public List<MessageAtribute> Atributes
         {
@@ -46,6 +63,7 @@ namespace EncryptMessanger.dll.Messages
         {
 
         }
+        
 
         //public string StartAtributeToString()
         //{
@@ -80,7 +98,7 @@ namespace EncryptMessanger.dll.Messages
         {
             return Encoding.UTF8.GetBytes(EndAtributeToString());
         }
-        public byte[] ToByte()
+        public virtual byte[] ToByte()
         {
             MemoryStream ms = new MemoryStream();
             ms.Write(BitConverter.GetBytes((int)Type), 0, 4);
@@ -97,7 +115,7 @@ namespace EncryptMessanger.dll.Messages
 
         }
 
-        public void FillFromBytes(byte[] bytes)
+        public virtual void FillFromBytes(byte[] bytes)
         {
             _atributes.Clear();
             MemoryStream ms = new MemoryStream(bytes);

@@ -10,17 +10,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.IO;
 
-public enum MessageType
-{
-    StartStreamMessage, EndStreamMessage, TextMessage, AuthMessage,
-    AuthResponceMessage, AuthSuccessMessage, PublicKeyMessage, SymKeyMessage,
-    ProcessedMessage, AbstractMessage, AuthErrorMessage, ClientPublicKeyMessage,
-    ClientSymKeyMessage, CreateCryptoSessionRequest, CreateCryptoSessionResponse,
-    ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
-    DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage
-};
-public enum Atribute { Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
-    UseEncryption, UseSignature };
+
 
 
 namespace EncryptMessanger.dll

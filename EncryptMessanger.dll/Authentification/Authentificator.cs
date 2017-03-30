@@ -87,10 +87,10 @@ namespace EncryptMessanger.dll.Authentification
             return false;
         }
         //метод для аутентификации со стороны сервера
-        public bool ServerAuth(MessageWriter messageWriter, MessageReader reader, UserPredicate CompareInfo)
+        public bool ServerAuth(MessageWriter messageWriter, MessageReader reader, UserPredicate CompareInfo, AuthResponceMessage authResponse)
         {
             
-            Messages.Message message = reader.ReadNext();
+            /*Messages.Message message = reader.ReadNext();
             if (message.Type != MessageType.AuthResponceMessage)
             {
                 if (message.Type == MessageType.EndStreamMessage)
@@ -103,7 +103,7 @@ namespace EncryptMessanger.dll.Authentification
                 }
                 return false;
             }
-            AuthResponceMessage authResponse = message as AuthResponceMessage;
+            AuthResponceMessage authResponse = message as AuthResponceMessage;*/
 
             if(CompareInfo(authResponse.Login, authResponse.Password))
             {
