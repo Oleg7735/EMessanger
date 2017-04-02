@@ -17,7 +17,7 @@ public enum MessageType
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
-    UseEncryption, UseSignature, DialogInfo
+    UseEncryption, UseSignature, DialogInfo, UserId, DialogsCount
 };
 namespace EncryptMessanger.dll.Messages
 {
@@ -279,6 +279,16 @@ namespace EncryptMessanger.dll.Messages
                 case MessageType.RegistrationSuccessMessage:
                     {
                         message = new RegistrationSuccessMessage();
+                        break;
+                    }
+                case MessageType.DialogsRequestMessage:
+                    {
+                        message = new DialogsRequestMessage();
+                        break;
+                    }
+                case MessageType.DialogResponceMessage:
+                    {
+                        message = new DialogsResponceMessage();
                         break;
                     }
                 default:

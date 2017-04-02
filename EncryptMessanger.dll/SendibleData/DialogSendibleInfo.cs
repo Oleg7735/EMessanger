@@ -7,13 +7,20 @@ using System.Threading.Tasks;
 
 namespace EncryptMessanger.dll.SendibleData
 {
-    class DialogSendibleInfo : ISendibleData
+     public class DialogSendibleInfo : ISendibleData
     {
         private long _dialogId;
         private string _dialogName;
         private DateTime _creationTime;
 
+        public DialogSendibleInfo()
+        {
 
+        }
+        public DialogSendibleInfo(byte[] bytes)
+        {
+            this.FillFromBytes(bytes);
+        }
         public void FillFromBytes(byte[] bytes)
         {
             int nameByteLength = bytes.Length - 16;

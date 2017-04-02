@@ -81,6 +81,7 @@
     <Compile Include="Messages\CreateCryptoSessionResponse.cs" />
     <Compile Include="Messages\DialogEncryptionSettingsMessage.cs" />
     <Compile Include="Messages\DialogsRequestMessage.cs" />
+    <Compile Include="Messages\DialogsResponceMessage.cs" />
     <Compile Include="Messages\EndStreamMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ProcessedMessage.cs" />

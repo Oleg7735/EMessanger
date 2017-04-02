@@ -83,6 +83,8 @@
     <Compile Include="Events\ClientRegistrationEventArgs.cs" />
     <Compile Include="Events\ClientStatusExitEventArgs.cs" />
     <Compile Include="Events\ClientStatusOnlineEventArgs.cs" />
+    <Compile Include="Events\DialogsReceivedEventArgs.cs" />
+    <Compile Include="Events\DialogsRequestEventArgs.cs" />
     <Compile Include="Events\EncryptionSettingsEventArgs.cs" />
     <Compile Include="Events\ExportKeysEventArgs.cs" />
     <Compile Include="Events\MessageSendEventArgs.cs" />

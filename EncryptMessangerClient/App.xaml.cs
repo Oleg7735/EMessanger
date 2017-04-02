@@ -281,6 +281,14 @@ namespace EncryptMessangerClient
             _registrationViewModel.CanselEventHandler += OnRegistrationCanseled;
             _registrationWindow.ShowDialog();
         }
+        private void OnDialogsRequest(object sender, DialogsRequestEventArgs args)
+        {
+
+        }
+        private void OnDialogsRecponce(object sender, DialogsReceivedEventArgs args)
+        {
+
+        }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {
         //        MainViewModel vm = null;

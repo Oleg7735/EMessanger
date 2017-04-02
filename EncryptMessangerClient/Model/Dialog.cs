@@ -11,6 +11,7 @@ namespace EncryptMessangerClient.Model
 {
     class Dialog : INotifyPropertyChanged, IEquatable<Dialog>
     {
+        private long _dialogId;
         private bool _sign = true;
         private bool _encrypt = true;
         private string _login;

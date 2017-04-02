@@ -15,6 +15,7 @@ using EncryptMessanger.dll.Encription;
 using EncryptMessanger.dll.Authentification;
 using EncryptMessangerClient.Events;
 using EncryptMessangerClient.Model;
+using EncryptMessanger.dll.SendibleData;
 
 namespace EncryptMessangerClient
 {
@@ -36,8 +37,10 @@ namespace EncryptMessangerClient
         public EventHandler<ClientStatusExitEventArgs> ClientExit;
         public GetDialogEncryptionSettings GetDialogSettings;
         public EventHandler<EncryptionSettingsEventArgs> EncryptionSettingsChanged;
+        //Обработчик при получении диалогов пользователя
+        public EventHandler<DialogsReceivedEventArgs> DilogsReceived;
         //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
-        
+
         private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
         private string _currentUserLogin = "user2";
         private string _currentUserPassword = "222";
@@ -181,6 +184,14 @@ namespace EncryptMessangerClient
                                 EncryptionSettingsChanged?.Invoke(this, new EncryptionSettingsEventArgs(settings.UseSign, settings.UseEncrypt));
                                 break;
                             }
+                        case MessageType.DialogResponceMessage:
+                            {
+                                
+                                DialogsResponceMessage dialogsRespoce = newMessage as DialogsResponceMessage;
+                                DilogsReceived?.Invoke(this, new DialogsReceivedEventArgs(dialogsRespoce.GetDialogsInfo()));
+                                break;
+                                
+                            }
                         case MessageType.EndStreamMessage:
                             {
                                 Close();
@@ -287,6 +298,11 @@ namespace EncryptMessangerClient
         //    _messageReder = new MessageReader(_client.GetStream());
 
         //}
+        public void RequesForDialog(long userId, int dialogsCount)
+        {
+            DialogsRequestMessage dialogsRequest = new DialogsRequestMessage(userId, dialogsCount);
+            _messageWriter.WriteMessage(dialogsRequest);
+        }
         public bool Auth(string login, string password)
         {
             Authentificator auth = new Authentificator();
@@ -348,5 +364,6 @@ namespace EncryptMessangerClient
             _client.Close();
             _cancellationTokenSource.Cancel();
         }
+        
     }
 }
