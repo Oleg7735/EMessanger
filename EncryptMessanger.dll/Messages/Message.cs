@@ -305,7 +305,12 @@ namespace EncryptMessanger.dll.Messages
                     {
                         message = new UserInfoResponceMessage();
                         break;
-                    }                
+                    }
+                case MessageType.EndStreamMessage:
+                    {
+                        message = new EndStreamMessage();
+                        break;
+                    }               
                 default:
                     {
                         throw new ArgumentException(String.Format("Не определено действие по созданию объекта сообщения для сообщения типа {0}", type.ToString()));

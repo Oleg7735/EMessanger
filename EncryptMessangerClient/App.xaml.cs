@@ -53,6 +53,7 @@ namespace EncryptMessangerClient
             vm.EncryptionSettingsChanged += OnEncryptionSettingChangedByUser;
             vm.DialogsRequest += OnDialogsRequest;
             vm.LoadDialogUserInfo += OnUserInfoRequest;
+            vm.UpdateDialogKeys += OnUpdateDialogEncryptionKeys;
             mainWindow.Closed += MainWindow_Closed;
            
             //mainWindow.Closed += vm.ClientStopCommand;

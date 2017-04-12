@@ -32,10 +32,13 @@ namespace EncryptMessanger.dll.Messages
         public ClientAKeyMessage(string key, long dialogId, long userId)
         {
             _type = MessageType.ClientPublicKeyMessage;
-            _atributes.Add(new MessageAtribute(Atribute.Key, Encoding.UTF8.GetBytes(key)));
-            SetAtributeValue(new MessageAtribute(Atribute.DialogId, BitConverter.GetBytes(dialogId)));
+            AddAtribute(new MessageAtribute(Atribute.Key, Encoding.UTF8.GetBytes(key)));
+            //AddAtribute(new MessageAtribute(Atribute.To, BitConverter.GetBytes(dialogId)));
+            //AddAtribute(new MessageAtribute(Atribute.From, BitConverter.GetBytes(userId)));
+            //_atributes.Add(new MessageAtribute(Atribute.Key, Encoding.UTF8.GetBytes(key)));
+            SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(dialogId)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            SetAtributeValue(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
+            SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(userId)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             //_atributes.Add(new MessageAtribute("key",key));
         }

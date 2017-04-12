@@ -133,7 +133,7 @@ namespace EncryptMessangerClient
                                 if (response.Response)
                                 {
                                     EncryptionProvider enc = new EncryptionProvider();
-                                    ClientClientEncryptedSession newSession = enc.ClientClientSenderEncrypt(_messageWriter, _messageReder, response.Dialog, response.From);
+                                    ClientClientEncryptedSession newSession = enc.ClientClientSenderEncrypt(_messageWriter, _messageReder, response.Dialog, _currentUserId);
                                     _sessions.Add(newSession);
                                 }
                                 ReleaseClient();
@@ -322,6 +322,7 @@ namespace EncryptMessangerClient
             if (auth.ClientAuth(_messageWriter, _messageReder, login, password))
             {
                 _currentUserLogin = login;
+                _currentUserId = auth.ClientId;
                 _currentUserPassword = password;
                 AuthSuccess?.Invoke(this, new ClientAuthSuccessEventArgs(auth.ClientId, auth.Login));
                 return true;
@@ -349,7 +350,7 @@ namespace EncryptMessangerClient
 
         public void UpdateDialogEncryptionKeys(long dialogId, long userId)
         {
-            new CreateCryptoSessionRequest(dialogId, userId);
+            _messageWriter.WriteMessage( new CreateCryptoSessionRequest(dialogId, userId));
         }
         public void ChangeEncryptionSettings(long dialog, bool useSign, bool useEncrypt)
         {
@@ -365,6 +366,8 @@ namespace EncryptMessangerClient
             if(registrator.Registrate(_messageWriter, _messageReder, login, password))
             {
                 RegistrationSuccess?.Invoke(this, new RegistrationSuccessEventArgs(login, registrator.UserId));
+                _currentUserId = registrator.UserId;
+                _currentUserLogin = login;
                 return true;
             }
             else

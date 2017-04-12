@@ -103,7 +103,7 @@ namespace EncryptMessanger.dll.Encription
             AesManaged aes = new AesManaged();
 
             aes.Mode = CipherMode.CBC;
-
+            //шифрование симметричного ключа
             byte[] iv = encryptRsa.Encrypt(aes.IV, true);
             byte[] key = encryptRsa.Encrypt(aes.Key, true);
             //отправка симметричного ключа
