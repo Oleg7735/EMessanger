@@ -92,6 +92,8 @@
     <Compile Include="Messages\SKeyMessage.cs" />
     <Compile Include="Messages\StartStreamMessage.cs" />
     <Compile Include="Messages\TextMessage.cs" />
+    <Compile Include="Messages\UserInfoRequest.cs" />
+    <Compile Include="Messages\UserInfoResponceMessage.cs" />
     <Compile Include="MessageWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -101,6 +103,7 @@
     </Compile>
     <Compile Include="SendibleData\DialogSendibleInfo.cs" />
     <Compile Include="SendibleData\ISendibleData.cs" />
+    <Compile Include="Tests\DialogSendibleInfoTest.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />
   </ItemGroup>

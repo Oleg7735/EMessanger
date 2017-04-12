@@ -9,12 +9,13 @@ namespace EncryptMessangerClient
     public class NewMessageEventArgs : EventArgs
     {
         private string _message;
-        private string _from;
+        private long _from;
+        private long _dialogId;
         public string Message
         {
             get { return _message; }
         }
-        public string Interlocutor
+        public long Interlocutor
         {
             get { return _from; }
         }
@@ -24,7 +25,20 @@ namespace EncryptMessangerClient
             get { return _isAltered; }
         }
 
-        public NewMessageEventArgs(string message, string from, bool isAltered)
+        public long DialogId
+        {
+            get
+            {
+                return _dialogId;
+            }
+
+            set
+            {
+                _dialogId = value;
+            }
+        }
+
+        public NewMessageEventArgs(string message, long from, bool isAltered)
         {
             _message = message;
             _from = from;

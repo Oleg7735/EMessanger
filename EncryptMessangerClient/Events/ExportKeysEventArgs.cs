@@ -9,17 +9,17 @@ namespace EncryptMessangerClient.Events
     public class ExportKeysEventArgs
     {
         private string _fileName;
-        private string _dialog;
+        private long _dialog;
         
         public string FileName
         {
             get { return _fileName; }
         }
-        public string Dialog
+        public long Dialog
         {
             get { return _dialog; }
         }
-        public ExportKeysEventArgs(string fileName, string dialog)
+        public ExportKeysEventArgs(string fileName, long dialog)
         {
             _fileName = fileName;
             _dialog = dialog;

@@ -33,7 +33,7 @@ namespace EncryptMessanger.dll.Authentification
             string error;
             if(RegistrationHandler(registrMessage.Login, registrMessage.BytePassword, out error))
             {
-                writer.WriteMessage(new RegistrationSuccessMessage());
+                //writer.WriteMessage(new RegistrationSuccessMessage());
                 return true;
             }
             else

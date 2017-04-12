@@ -4,13 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EncryptMessangerClient.Events
+namespace EncryptMessangerClient.Model
 {
-    public class RegistrationSuccessEventArgs
+    class UserInfo
     {
-        //Логин, под которым пользователь идентифицирован на сервере
         private string _login;
         private long _id;
+
+        public UserInfo()
+        {
+
+        }
+        public UserInfo(long id, string login)
+        {
+            _id = id;
+            _login = login;
+        }
 
         public string Login
         {
@@ -36,12 +45,6 @@ namespace EncryptMessangerClient.Events
             {
                 _id = value;
             }
-        }
-
-        public RegistrationSuccessEventArgs(string login, long id)
-        {
-            Login = login;
-            Id = id;
         }
     }
 }

@@ -29,13 +29,13 @@ namespace EncryptMessanger.dll.Messages
                 return Encoding.UTF8.GetString(GetAttribute(Atribute.Key));
             }
         }
-        public ClientAKeyMessage(string key, string to, string from)
+        public ClientAKeyMessage(string key, long dialogId, long userId)
         {
             _type = MessageType.ClientPublicKeyMessage;
             _atributes.Add(new MessageAtribute(Atribute.Key, Encoding.UTF8.GetBytes(key)));
-            setAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
+            SetAtributeValue(new MessageAtribute(Atribute.DialogId, BitConverter.GetBytes(dialogId)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
+            SetAtributeValue(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             //_atributes.Add(new MessageAtribute("key",key));
         }

@@ -81,7 +81,7 @@ namespace EncryptMessanger.dll.Encription
             messageWriter.ProtectStream(encrptTransform);
             reader.ProtectStream(decryptTransform);
         }
-        public ClientClientEncryptedSession ClientClientSenderEncrypt(MessageWriter messageWriter, MessageReader reader, string senderLogin, string reciverLogin)
+        public ClientClientEncryptedSession ClientClientSenderEncrypt(MessageWriter messageWriter, MessageReader reader, long dialogId, long senderId)
         {
             //для шифрования симетричного ключа
             RSACryptoServiceProvider encryptRsa = new RSACryptoServiceProvider();
@@ -90,7 +90,7 @@ namespace EncryptMessanger.dll.Encription
             RSACryptoServiceProvider encryptRsaForSign = new RSACryptoServiceProvider();//предоставляет закрытый ключ для зашивровки хеша сообщений
             RSACryptoServiceProvider decryptRsaForSign = new RSACryptoServiceProvider();//предоставляет открытый ключ получателя для расшифровки хеша ЭЦП
             //отправка публичного RSA ключа
-            messageWriter.WriteMessage(new ClientAKeyMessage(decryptRsa.ToXmlString(false),reciverLogin,senderLogin));
+            messageWriter.WriteMessage(new ClientAKeyMessage(decryptRsa.ToXmlString(false),dialogId,senderId));
             
             Message message = reader.ReadNext();
             //получение публичного RSA ключа
@@ -107,9 +107,9 @@ namespace EncryptMessanger.dll.Encription
             byte[] iv = encryptRsa.Encrypt(aes.IV, true);
             byte[] key = encryptRsa.Encrypt(aes.Key, true);
             //отправка симметричного ключа
-            messageWriter.WriteMessage(new ClientSKeyMessage(iv, key, reciverLogin, senderLogin));
+            messageWriter.WriteMessage(new ClientSKeyMessage(iv, key, dialogId, senderId));
             //отправка ключа для ЭЦП
-            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), reciverLogin, senderLogin));
+            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), dialogId, senderId));
             //прием ключа для ЭЦП
             message = reader.ReadNext();
             if (!(message.Type == MessageType.ClientClientSignKeyMessage))
@@ -120,12 +120,12 @@ namespace EncryptMessanger.dll.Encription
 
             //ICryptoTransform encrptTransform = aes.CreateEncryptor();
             //ICryptoTransform decryptTransform = aes.CreateDecryptor();
-            return new ClientClientEncryptedSession(aes, reciverLogin, encryptRsaForSign, decryptRsaForSign);
+            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, decryptRsaForSign);
         }
-        public ClientClientEncryptedSession ClientClientResiverEncrypt(MessageWriter messageWriter, MessageReader reader, string currentUserLogin, ClientAKeyMessage aKeyMessage)
+        public ClientClientEncryptedSession ClientClientResiverEncrypt(MessageWriter messageWriter, MessageReader reader, long currentUserId, ClientAKeyMessage aKeyMessage)
         {
             //для шифрования симетричного ключа
-            string anotherUserLogin = aKeyMessage.From;
+            long dialogId = aKeyMessage.Dialog;
             RSACryptoServiceProvider encryptRsa = new RSACryptoServiceProvider();
             RSACryptoServiceProvider decryptRsa = new RSACryptoServiceProvider();
             //для ЭЦП
@@ -138,7 +138,7 @@ namespace EncryptMessanger.dll.Encription
             //    throw new Exception("Protocol error. Public key do not resived");
             //}
             encryptRsa.FromXmlString(((ClientAKeyMessage)message).RsaKey);
-            messageWriter.WriteMessage(new ClientAKeyMessage(decryptRsa.ToXmlString(false),anotherUserLogin, currentUserLogin));
+            messageWriter.WriteMessage(new ClientAKeyMessage(decryptRsa.ToXmlString(false), dialogId, currentUserId));
 
             message = reader.ReadNext();
             if (!(message.Type == MessageType.ClientSymKeyMessage))
@@ -147,7 +147,7 @@ namespace EncryptMessanger.dll.Encription
             }
             AesManaged aes = new AesManaged();
             aes.Mode = CipherMode.CBC;
-
+            
             ClientSKeyMessage sMessage = message as ClientSKeyMessage;
             aes.IV = decryptRsa.Decrypt(sMessage.IV, true);
 
@@ -159,12 +159,12 @@ namespace EncryptMessanger.dll.Encription
                 throw new Exception("Protocol error. Sign key do not resived");
             }
             decryptRsaForSign.FromXmlString(((ClientClientSignKeyMessage)message).RsaKey);
-            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), anotherUserLogin, currentUserLogin));
+            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), dialogId, currentUserId));
             
 
             //ICryptoTransform encrptTransform = aes.CreateEncryptor();
             //ICryptoTransform decryptTransform = aes.CreateDecryptor();
-            return new ClientClientEncryptedSession(aes, anotherUserLogin, encryptRsaForSign, decryptRsaForSign );
+            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, decryptRsaForSign );
         }
     }
 }

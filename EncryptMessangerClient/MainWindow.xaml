@@ -55,13 +55,14 @@
             <MenuItem Header="Шифрование">
                 <MenuItem Header="Экспорт ключей" Command="{Binding ExportKeysCommand}"></MenuItem>
                 <MenuItem Header="Настройки" Command="{Binding EncryptSessionCommand}"></MenuItem>
+                <MenuItem Header="Обновить ключи шифрования" Command="{Binding UpdateDialogEncryptionKeysCommand}"></MenuItem>
             </MenuItem>            
         </Menu>
         <ListBox x:Name="dialogListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Dialogs}" SelectedIndex="{Binding DialogSelectedIndex}" Grid.Row="1">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="m:Dialog">
                     <Border BorderBrush="Black" Margin="5" BorderThickness="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                        <Label Content="{Binding Login}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Label>
+                        <Label Content="{Binding Name}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Label>
                     </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>

@@ -38,7 +38,7 @@ namespace EncryptMessanger.dll.Tests
 
             mw.WriteMessage(new TextMessage("user1", "user2", Encoding.UTF8.GetBytes("new text")));
             TextMessage message = mr.ReadNext() as TextMessage;
-            Assert.That(message.From.Equals("user1")&& message.To.Equals("user2")
+            Assert.That(message.From == 1 && message.Dialog == 1
                 && message.Text.Equals("new text"));
 
             localClient.Close();

@@ -13,6 +13,7 @@ namespace EncryptMessanger.dll.Authentification
     public class ClientRegistrator
     {
         private string _lastError;
+        private long _userId;
 
         public string LastError
         {
@@ -26,6 +27,15 @@ namespace EncryptMessanger.dll.Authentification
                 _lastError = value;
             }
         }
+
+        public long UserId
+        {
+            get
+            {
+                return _userId;
+            }            
+        }
+
         /// <summary>
         /// Метод для регистрации клиента.
         /// </summary>
@@ -49,6 +59,8 @@ namespace EncryptMessanger.dll.Authentification
             {
                 case MessageType.RegistrationSuccessMessage:
                     {
+                        RegistrationSuccessMessage regMessage = responceMessage as RegistrationSuccessMessage;
+                        _userId = regMessage.UserId;
                         return true;
                     }
                 case MessageType.RegistrationErrorMessage:

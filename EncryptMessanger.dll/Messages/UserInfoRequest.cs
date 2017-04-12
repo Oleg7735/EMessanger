@@ -6,31 +6,29 @@ using System.Threading.Tasks;
 
 namespace EncryptMessanger.dll.Messages
 {
-    public class RegistrationSuccessMessage:Message
+    public class UserInfoRequestMessage:Message
     {
 
-        public RegistrationSuccessMessage()
+        private void Init()
+        {
+            _type = MessageType.UserInfoRequestMessage;
+        }
+        public UserInfoRequestMessage()
         {
             Init();
         }
-        public RegistrationSuccessMessage(long userId)
+        public UserInfoRequestMessage(long userId)
         {
             Init();
             AddAtribute(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
         }
-
-
-        private void Init()
-        {
-            _type = MessageType.RegistrationSuccessMessage;
-        }
-
         public long UserId
         {
             get
             {
                 return BitConverter.ToInt64(GetAttribute(Atribute.UserId), 0);
             }
-        }
+        }        
+
     }
 }

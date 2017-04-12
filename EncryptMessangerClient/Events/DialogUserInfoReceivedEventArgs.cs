@@ -6,11 +6,23 @@ using System.Threading.Tasks;
 
 namespace EncryptMessangerClient.Events
 {
-    public class RegistrationSuccessEventArgs
+    public class DialogUserInfoReceivedEventArgs
     {
-        //Логин, под которым пользователь идентифицирован на сервере
+        private long _userId;
         private string _login;
-        private long _id;
+
+        public long UserId
+        {
+            get
+            {
+                return _userId;
+            }
+
+            set
+            {
+                _userId = value;
+            }
+        }
 
         public string Login
         {
@@ -25,23 +37,14 @@ namespace EncryptMessangerClient.Events
             }
         }
 
-        public long Id
+        public DialogUserInfoReceivedEventArgs()
         {
-            get
-            {
-                return _id;
-            }
 
-            set
-            {
-                _id = value;
-            }
         }
-
-        public RegistrationSuccessEventArgs(string login, long id)
+        public DialogUserInfoReceivedEventArgs(long id, string login)
         {
+            UserId = id;
             Login = login;
-            Id = id;
         }
     }
 }

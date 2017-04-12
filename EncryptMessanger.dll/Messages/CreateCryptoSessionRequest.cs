@@ -18,10 +18,10 @@ namespace EncryptMessanger.dll.Messages
         //    set { setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(value))); }
         //    get { return Encoding.UTF8.GetString(GetAttribute(Atribute.From)); }
         //}
-        public CreateCryptoSessionRequest(string to, string from)
+        public CreateCryptoSessionRequest(long dialogId, long from)
         {
             _type = MessageType.CreateCryptoSessionRequest;
-            To = to;
+            Dialog = dialogId;
             From = from;
         }
         public CreateCryptoSessionRequest()

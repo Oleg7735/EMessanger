@@ -80,20 +80,29 @@
     </Compile>
     <Compile Include="Events\AuthErrorEventArgs.cs" />
     <Compile Include="Events\ClientAuthEventArgs.cs" />
+    <Compile Include="Events\ClientAuthSuccessEventArgs.cs" />
     <Compile Include="Events\ClientRegistrationEventArgs.cs" />
     <Compile Include="Events\ClientStatusExitEventArgs.cs" />
     <Compile Include="Events\ClientStatusOnlineEventArgs.cs" />
     <Compile Include="Events\DialogsReceivedEventArgs.cs" />
     <Compile Include="Events\DialogsRequestEventArgs.cs" />
+    <Compile Include="Events\DialogUserInfoReceivedEventArgs.cs" />
     <Compile Include="Events\EncryptionSettingsEventArgs.cs" />
     <Compile Include="Events\ExportKeysEventArgs.cs" />
+    <Compile Include="Events\LoadDialogMessagesEventArgs.cs" />
+    <Compile Include="Events\LoadDialogUserInfoEventArgs.cs" />
     <Compile Include="Events\MessageSendEventArgs.cs" />
     <Compile Include="Events\NewMessageEventArgs.cs" />
     <Compile Include="Events\RegistrationErrorEventArgs.cs" />
     <Compile Include="Events\RegistrationSuccessEventArgs.cs" />
+    <Compile Include="Events\UpdateDialogEncryptionKeysEventArgs.cs" />
+    <Compile Include="extensions\DialogsObservableCollectionExtension.cs" />
+    <Compile Include="MessageBoxService\IMsgBoxService  .cs" />
+    <Compile Include="MessageBoxService\MsgBoxService.cs" />
     <Compile Include="Model\Dialog.cs" />
     <Compile Include="Model\DialogMessage.cs" />
     <Compile Include="Model\RegistrationInfo.cs" />
+    <Compile Include="Model\UserInfo.cs" />
     <Compile Include="RegistrationForm.xaml.cs">
       <DependentUpon>RegistrationForm.xaml</DependentUpon>
     </Compile>
@@ -173,6 +182,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

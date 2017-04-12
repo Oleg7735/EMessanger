@@ -9,6 +9,22 @@ namespace EncryptMessanger.dll.Messages
 {
     public class DialogsResponceMessage:Message
     {
+        private void Init()
+        {
+            _type = MessageType.DialogResponceMessage;
+        }
+        public DialogsResponceMessage(DialogSendibleInfo[] dialogsInfo)
+        {
+            Init();
+            foreach(DialogSendibleInfo info in dialogsInfo)
+            {
+                AddDialogInfo(info);
+            }
+        }
+        public DialogsResponceMessage()
+        {
+            Init();            
+        }
         public void AddDialogInfo(DialogSendibleInfo dialogInfo)
         {
             AddAtribute(new MessageAtribute( Atribute.DialogInfo, dialogInfo.ToByte()));

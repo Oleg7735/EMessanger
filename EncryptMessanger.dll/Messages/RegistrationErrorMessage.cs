@@ -10,7 +10,7 @@ namespace EncryptMessanger.dll.Messages
     {
         public RegistrationErrorMessage(string errorText)
         {
-            setAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(errorText)));
+            SetAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(errorText)));
             _type = MessageType.RegistrationErrorMessage;
         }
         public RegistrationErrorMessage()
@@ -19,12 +19,12 @@ namespace EncryptMessanger.dll.Messages
         }
         public byte[] byteText
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.Text, value)); }
+            set { SetAtributeValue(new MessageAtribute(Atribute.Text, value)); }
             get { return GetAttribute(Atribute.Text); }
         }
         public string Text
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(value))); }
+            set { SetAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(value))); }
             get { return Encoding.UTF8.GetString(GetAttribute(Atribute.Text)); }
         }
     }

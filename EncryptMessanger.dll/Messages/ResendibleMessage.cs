@@ -13,15 +13,30 @@ namespace EncryptMessanger.dll.Messages
             _atributes.Add(new MessageAtribute(Atribute.To, new byte[] { 0}));
             _atributes.Add(new MessageAtribute(Atribute.From, new byte[] { 0 }));
         }
-        public string To
+        public long Dialog
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(value))); }
-            get { return Encoding.UTF8.GetString(GetAttribute(Atribute.To)); }
+            set
+            {
+                //SetAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(value)));
+                SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(value)));
+            }
+            get
+            {
+                //return Encoding.UTF8.GetString(GetAttribute(Atribute.To));
+                return BitConverter.ToInt64(GetAttribute(Atribute.To),0);
+            }
         }
-        public string From
+        public long From
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(value))); }
-            get { return Encoding.UTF8.GetString(GetAttribute(Atribute.From)); }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(value)));
+                //SetAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(value)));
+            }
+            get
+            {
+                return BitConverter.ToInt64(GetAttribute(Atribute.From), 0);
+            }
         }
     }
 }

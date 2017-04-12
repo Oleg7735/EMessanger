@@ -27,15 +27,15 @@ namespace EncryptMessanger.dll.Encription
         RSACryptoServiceProvider _rsaToSign;
         RSACryptoServiceProvider _rsaToVerify;
 
-        string _interlocutor;
-        public string Interlocutor
+        long _dialogId;
+        public long Dialog
         {
-            get { return _interlocutor; }
+            get { return _dialogId; }
         }
 
-        public ClientClientEncryptedSession(AesManaged aes, string interlocutor, RSACryptoServiceProvider rsaToSign, RSACryptoServiceProvider rsaToVerify)
+        public ClientClientEncryptedSession(AesManaged aes, long dialogId, RSACryptoServiceProvider rsaToSign, RSACryptoServiceProvider rsaToVerify)
         {
-            _interlocutor = interlocutor;
+            _dialogId = dialogId;
             //_encryptor = encryptor;
             //_decryptor = decryptor;
             _encryptor = aes.CreateEncryptor();

@@ -9,18 +9,18 @@ namespace EncryptMessangerClient.Events
     class MessageSendEventArgs
     {
         private string _message;
-        private string _to;
+        private long _to;
         public string Message
         {
             get { return _message; }
         }
-        public string Resiver
+        public long To
         {
             get { return _to; }
         }
         
 
-        public MessageSendEventArgs(string message, string to)
+        public MessageSendEventArgs(string message, long to)
         {
             _message = message;
             _to = to;

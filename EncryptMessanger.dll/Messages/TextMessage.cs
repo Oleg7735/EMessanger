@@ -31,12 +31,12 @@ namespace EncryptMessanger.dll.Messages
         }*/
         public byte[] byteText
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.Text, value)); }
+            set { SetAtributeValue(new MessageAtribute(Atribute.Text, value)); }
             get { return GetAttribute(Atribute.Text); }
         }
         public string Text
         {
-            set { setAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(value))); }
+            set { SetAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(value))); }
             get { return Encoding.UTF8.GetString(GetAttribute(Atribute.Text)); }
         }
         private void init()
@@ -48,11 +48,11 @@ namespace EncryptMessanger.dll.Messages
         {
             init();
         }
-        public TextMessage(string from, string to, string text)
+        public TextMessage(long from, long to, string text)
         {
             init();
-            setAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
+            SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(to)));
+            SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(from)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(text)));
@@ -62,8 +62,8 @@ namespace EncryptMessanger.dll.Messages
             init();
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
-            setAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
+            SetAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
+            SetAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, text));
         }
         public void AddSignature(byte[] signature)
@@ -84,7 +84,7 @@ namespace EncryptMessanger.dll.Messages
         }
         public override string ToString()
         {
-            return "Text message from " + From + " to " + To + " text = " + Text + " Signature = " + Encoding.UTF8.GetString(GetSignature());
+            return "Text message from user " + From + " to dalog" + Dialog + " text = " + Text + " Signature = " + Encoding.UTF8.GetString(GetSignature());
         }
     }
 }

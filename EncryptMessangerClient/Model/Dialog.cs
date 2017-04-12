@@ -9,25 +9,26 @@ using System.Threading.Tasks;
 
 namespace EncryptMessangerClient.Model
 {
-    class Dialog : INotifyPropertyChanged, IEquatable<Dialog>
+     class Dialog : INotifyPropertyChanged, IEquatable<Dialog>
     {
+        private long[] _membersId;
         private long _dialogId;
         private bool _sign = true;
         private bool _encrypt = true;
-        private string _login;
+        private string _dialogName;
         private ObservableCollection<DialogMessage> _dialogMessages = new ObservableCollection<DialogMessage>();
         public ObservableCollection<DialogMessage> DialogMessages
         {
             get { return _dialogMessages; }
         }
-        public string Login
+        public string Name
         {
-            get { return _login; }
+            get { return _dialogName; }
             private set
             {
-                if(!_login.Equals(value) && value != null)
+                if(!_dialogName.Equals(value) && value != null)
                 {
-                    _login = value;
+                    _dialogName = value;
                 }
             }
         }
@@ -56,6 +57,33 @@ namespace EncryptMessangerClient.Model
                 }
             }
         }
+
+        public long DialogId
+        {
+            get
+            {
+                return _dialogId;
+            }
+
+            set
+            {
+                _dialogId = value;
+            }
+        }
+
+        public long[] MembersId
+        {
+            get
+            {
+                return _membersId;
+            }
+
+            set
+            {
+                _membersId = value;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName]string propertyName = "")
         {
@@ -64,15 +92,23 @@ namespace EncryptMessangerClient.Model
 
         public bool Equals(Dialog other)
         {
-            return other.Login.Equals(_login);
+            return other.DialogId == DialogId;
         }
         public Dialog()
         {
 
         }
-        public Dialog(string login)
+        public Dialog(string name)
         {
-            _login = login;
+            _dialogName = name;
+        }
+        public Dialog(string name, long dialogId, bool encrypt, bool sign, long[] membersId)
+        {
+            _dialogName = name;
+            DialogId = dialogId;
+            _encrypt = encrypt;
+            _sign = sign;
+            MembersId = membersId;
         }
     }
 }

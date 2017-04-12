@@ -15,12 +15,24 @@ namespace EncryptMessanger.dll.Authentification
     {
         
         private string _login;
+        private long _clientId;
+
 
         public string CurrentError;
         public string Login
         {
             get { return _login; }
         }
+
+        public long ClientId
+        {
+            get
+            {
+                return _clientId;
+            }
+            
+        }
+
         private byte[] GetUserPassword(long userId)
         {
             return new byte[] { 1, 2, 3, 4, 5, 6, 6 };
@@ -74,6 +86,9 @@ namespace EncryptMessanger.dll.Authentification
             {
                 case MessageType.AuthSuccessMessage:
                     {
+                        AuthSuccessMessage authSuccessMessage = (AuthSuccessMessage) message;
+                        _clientId = authSuccessMessage.UserId;
+                        _login = login;
                         return true;
                     }
                 case MessageType.AuthErrorMessage:
@@ -107,7 +122,7 @@ namespace EncryptMessanger.dll.Authentification
 
             if(CompareInfo(authResponse.Login, authResponse.Password))
             {
-                messageWriter.WriteMessage(new AuthSuccessMessage());
+                //messageWriter.WriteMessage(new AuthSuccessMessage());
                 _login = authResponse.Login;
                 return true;
             }

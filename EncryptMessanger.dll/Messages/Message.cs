@@ -12,12 +12,12 @@ public enum MessageType
     ClientSymKeyMessage, CreateCryptoSessionRequest, CreateCryptoSessionResponse,
     ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
     DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
-    DialogsRequestMessage, DialogResponceMessage
+    DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage
 };
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
-    UseEncryption, UseSignature, DialogInfo, UserId, DialogsCount
+    UseEncryption, UseSignature, DialogInfo, UserId, DialogsCount, DialogOffset, DialogId
 };
 namespace EncryptMessanger.dll.Messages
 {
@@ -31,7 +31,7 @@ namespace EncryptMessanger.dll.Messages
         {
             _atributes.Add(messageAtribute);
         }
-        protected void setAtributeValue(MessageAtribute messageAtribute)
+        protected void SetAtributeValue(MessageAtribute messageAtribute)
         {
             for (int i = 0; i < _atributes.Count; i++)
             {
@@ -181,6 +181,11 @@ namespace EncryptMessanger.dll.Messages
             MessageType type = (MessageType)Enum.ToObject(typeof(MessageType), BitConverter.ToInt32(mType, 0));
             switch (type)
             {
+                case MessageType.AuthSuccessMessage:
+                    {
+                        message = new AuthSuccessMessage();
+                        break;
+                    }
                 case MessageType.AuthMessage:
                     {
                         message = new AuthMessage();
@@ -291,9 +296,20 @@ namespace EncryptMessanger.dll.Messages
                         message = new DialogsResponceMessage();
                         break;
                     }
+                case MessageType.UserInfoRequestMessage:
+                    {
+                        message = new UserInfoRequestMessage();
+                        break;
+                    }
+                case MessageType.UserInfoResponceMessage:
+                    {
+                        message = new UserInfoResponceMessage();
+                        break;
+                    }                
                 default:
                     {
-                        message = new Message();
+                        throw new ArgumentException(String.Format("Не определено действие по созданию объекта сообщения для сообщения типа {0}", type.ToString()));
+                        //message = new Message();
                         break;
                     }
             }

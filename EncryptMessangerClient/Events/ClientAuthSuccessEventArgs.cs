@@ -6,11 +6,20 @@ using System.Threading.Tasks;
 
 namespace EncryptMessangerClient.Events
 {
-    public class RegistrationSuccessEventArgs
+    public class ClientAuthSuccessEventArgs:EventArgs
     {
-        //Логин, под которым пользователь идентифицирован на сервере
         private string _login;
         private long _id;
+
+        public ClientAuthSuccessEventArgs(long id, string login)
+        {
+            _id = id;
+            _login = login;
+        }
+        public ClientAuthSuccessEventArgs()
+        {
+
+        }
 
         public string Login
         {
@@ -36,12 +45,6 @@ namespace EncryptMessangerClient.Events
             {
                 _id = value;
             }
-        }
-
-        public RegistrationSuccessEventArgs(string login, long id)
-        {
-            Login = login;
-            Id = id;
         }
     }
 }

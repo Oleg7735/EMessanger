@@ -1,4 +1,5 @@
 ﻿using EncryptMessanger.dll.SendibleData;
+using EncryptMessangerClient.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,22 +10,22 @@ namespace EncryptMessangerClient.Events
 {
     public class DialogsReceivedEventArgs:EventArgs
     {
-        public DialogsReceivedEventArgs(List<DialogSendibleInfo> dialogsInfo)
+        public DialogsReceivedEventArgs(List<DialogSendibleInfo> dialogs)
         {
-            DialogsInfo = dialogsInfo;
+            Dialogs = dialogs;
         }
-        private List<DialogSendibleInfo> _dialogsInfo;
+        private List<DialogSendibleInfo> _dialogs;
 
-        public List<DialogSendibleInfo> DialogsInfo
+        public List<DialogSendibleInfo> Dialogs
         {
             get
             {
-                return _dialogsInfo;
+                return _dialogs;
             }
 
             set
             {
-                _dialogsInfo = value;
+                _dialogs = value;
             }
         }
     }

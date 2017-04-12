@@ -11,13 +11,13 @@ namespace EncryptMessangerClient.Model
     {
         private string _alteredMessage = "Сообщение было изменено!";
 
-        private string _author;
+        private UserInfo _author;
         private string _text;
         private bool _isAltered;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string Author
+        public UserInfo Author
         {
             get { return _author; }
         }
@@ -41,7 +41,7 @@ namespace EncryptMessangerClient.Model
                 return "";
             }
         }
-        public DialogMessage(string author, string text, bool isAltered)
+        public DialogMessage(UserInfo author, string text, bool isAltered)
         {
             _isAltered = isAltered;
             _text = text;

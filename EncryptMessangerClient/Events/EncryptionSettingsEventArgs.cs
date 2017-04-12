@@ -10,8 +10,8 @@ namespace EncryptMessangerClient.Events
     {
         bool _sign;
         bool _encrypt;
-        string _dialog;
-        public string Dialog
+        long _dialog;
+        public long Dialog
         {
             get { return _dialog; }
         }
@@ -28,7 +28,7 @@ namespace EncryptMessangerClient.Events
             _sign = sign;
             _encrypt = encrypt;
         }
-        public EncryptionSettingsEventArgs(bool sign, bool encrypt, string dialog)
+        public EncryptionSettingsEventArgs(bool sign, bool encrypt, long dialog)
         {
             _sign = sign;
             _encrypt = encrypt;

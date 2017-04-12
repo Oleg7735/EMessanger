@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using EncryptMessangerClient.Model;
 using System.ComponentModel;
+using EncryptMessanger.dll.SendibleData;
+using EncryptMessangerClient.extensions;
 
 namespace EncryptMessangerClient
 {
@@ -38,6 +40,9 @@ namespace EncryptMessangerClient
             _client.EncryptionSettingsChanged += OnEncryptionSettingChanged;
             _client.RegistrationError += OnRegistrationError;
             _client.RegistrationSuccess += OnRegistrationSuccess;
+            _client.DilogsReceived += OnDialogsRecponce;
+            _client.AuthSuccess += OnClientAuthSuccess;
+            _client.UserInfoReceived += OnUserInfoResponce;
             MainWindow mainWindow = new MainWindow();
             MainViewModel vm = mainWindow.DataContext as MainViewModel;
             vm.MessageSend += SendMessage;
@@ -46,6 +51,8 @@ namespace EncryptMessangerClient
             vm.ExportKeysEventHandler += OnExportKeys;
             vm.EditEncryptionSettings += OnEditEncryptionSettings;
             vm.EncryptionSettingsChanged += OnEncryptionSettingChangedByUser;
+            vm.DialogsRequest += OnDialogsRequest;
+            vm.LoadDialogUserInfo += OnUserInfoRequest;
             mainWindow.Closed += MainWindow_Closed;
            
             //mainWindow.Closed += vm.ClientStopCommand;
@@ -53,7 +60,7 @@ namespace EncryptMessangerClient
             //mainWindow.Show();
 
             _logInForm = new AuthWindow();
-            _logInForm.Closed += MainWindow_Closed;
+            _logInForm.Closed += AuthWindow_Closed;
             
 
             _encrytionSettingsForm = new EncryptionSettings();
@@ -65,7 +72,7 @@ namespace EncryptMessangerClient
 
             LogInViewModel logvm = _logInForm.DataContext as LogInViewModel;
             logvm.AuthClient += OnClientAuthRequest;
-            logvm.CloseClient += MainWindow_Closed;
+            logvm.CloseClient += OnAuthExit;
             logvm.RegistrateClient += OpenRegstrationWindow;
 
 
@@ -90,17 +97,30 @@ namespace EncryptMessangerClient
                     //vm.MessageBox = e.Message;
 
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
-                    vm.AddMessage(e.Interlocutor, e.Message, e.IsAltered);
+                    vm.AddMessage(e.Interlocutor, e.DialogId, e.Message, e.IsAltered);
                 });
             }
         }
         private void SendMessage(object sender, MessageSendEventArgs e)
         {
-            CurrentClient.SendMessage(e.Message, e.Resiver);
+            CurrentClient.SendMessage(e.Message, e.To);
         }
         private void OnClientStop(object sender, EventArgs e)
         {
             _client.Stop();
+        }
+        private void OnAuthExit(object sender, EventArgs e)
+        {
+            _logInForm.Close();
+        }
+        private void AuthWindow_Closed(object sender, EventArgs e)
+        {            
+            if (_registrationWindow != null)
+            {
+                _registrationWindow.Close();
+            }
+            _client.Stop();
+            Shutdown();
         }
         private void MainWindow_Closed(object sender, EventArgs e)
         {
@@ -115,17 +135,25 @@ namespace EncryptMessangerClient
             _client.Stop();
             Shutdown();
         }
-        private async void OnClientAuthRequest(object sender, ClientAuthEventArgs e)
+        private  void OnClientAuthRequest(object sender, ClientAuthEventArgs e)
         {
-            if (_client.Auth(e.Login, e.Password))
-            {
-                _logInForm.Hide();
-                StartMainWindow(e.Login);
-                await _client.StartAsync();
-            }
+            _client.Auth(e.Login, e.Password);
         }
 
-        private void StartMainWindow(string login)
+        private async void OnClientAuthSuccess(object sender, ClientAuthSuccessEventArgs e)
+        {
+            _logInForm.Hide();
+            StartMainWindow(e.Login, e.Id);
+            Dispatcher.Invoke(() =>
+            {
+                MainViewModel vm = MainWindow.DataContext as MainViewModel;
+                //vm.CurrentUserLogin = e.Login;
+            });
+            _client.RequesForDialog(20, 0);
+            await _client.StartAsync();
+        }
+
+        private void StartMainWindow(string login, long userId)
         {
             MainWindow.Show();
 
@@ -143,8 +171,10 @@ namespace EncryptMessangerClient
 
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
                     vm.CurrentUserLogin = login;
+                    vm.CurrentUserId = userId;
                 });
             }
+            
         }
 
         private void OnClientAuthError(object sender, AuthErrorEventArgs error)
@@ -155,7 +185,7 @@ namespace EncryptMessangerClient
 
         private void OnClientOnline(object sender, ClientStatusOnlineEventArgs client)
         {
-            MainViewModel vm = null;
+            /*MainViewModel vm = null;
             Dispatcher.Invoke(() =>
             {
                 vm = MainWindow.DataContext as MainViewModel;
@@ -178,12 +208,13 @@ namespace EncryptMessangerClient
                         });
                     }
                 }
-            }
+            }*/
+            //throw new Exception("No implementation of App.Xml.OnClientOnline");
 
         }
         private void OnClientExit(object sender, ClientStatusExitEventArgs client)
         {
-            MainViewModel vm = null;
+            /*MainViewModel vm = null;
             Dispatcher.Invoke(() =>
             {
                 vm = MainWindow.DataContext as MainViewModel;
@@ -193,7 +224,8 @@ namespace EncryptMessangerClient
                 Dispatcher.Invoke(()=> {
                     vm.Dialogs.Remove(new Dialog(client.Login));
                 });                
-            }
+            }*/
+            //throw new Exception("No implementation of App.Xml.OnClientExit");
 
         }
         private void OnEditEncryptionSettings(object sender, EventArgs e)
@@ -253,7 +285,7 @@ namespace EncryptMessangerClient
         {
             _registrationWindow.Hide();
             _logInForm.Hide();
-            StartMainWindow(e.Login);
+            StartMainWindow(e.Login, e.Id);
         }
         //событие запроса на регистрацию на сервере от RegistrationViewModel
         private void OnRegistration(object sender, ClientRegistrationEventArgs e)
@@ -270,7 +302,7 @@ namespace EncryptMessangerClient
         }
         private void OnEncryptionSettingChangedByUser(object sender, EncryptionSettingsEventArgs e)
         {
-            _client.ChangeEncryptionSettings(e.Dialog,e.Sign,e.Encrypt);
+            _client.ChangeEncryptionSettings(e.Dialog, e.Sign, e.Encrypt);
         }
         //обрабатывает событие начала регистрации от LogInViewModel. Запускает флрму регистрации
         private void OpenRegstrationWindow(object sender, EventArgs e)
@@ -283,11 +315,52 @@ namespace EncryptMessangerClient
         }
         private void OnDialogsRequest(object sender, DialogsRequestEventArgs args)
         {
-
+            _client.RequesForDialog(args.DialogsCount, args.DialogsOffset);
         }
         private void OnDialogsRecponce(object sender, DialogsReceivedEventArgs args)
         {
+            if (args.Dialogs.Count != 0)
+            {
+                MainViewModel vm = null;
+                Dispatcher.Invoke(() =>
+                {
+                    vm = MainWindow.DataContext as MainViewModel;
+                });
+                if (vm != null)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        foreach (DialogSendibleInfo d in args.Dialogs)
+                        {
+                            vm.Dialogs.AddFromDialogInfo(d);
+                        }
+                    });
+                }
+            }
+        }
+        private void OnUpdateDialogEncryptionKeys(object sender, UpdateDialogEncryptionKeysEventArgs args)
+        {
+            _client.UpdateDialogEncryptionKeys(args.DialogId, args.UserId);
+        }
 
+        private void OnUserInfoRequest(object sender, LoadDialogUserInfoEventArgs args)
+        {
+            _client.RequestUserInfo(args.UserId);
+        }
+        private void OnUserInfoResponce(object sender, DialogUserInfoReceivedEventArgs args)
+        {
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+            });
+            if (vm != null)
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    vm.AddContact(new UserInfo(args.UserId, args.Login));
+                });
+            }
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

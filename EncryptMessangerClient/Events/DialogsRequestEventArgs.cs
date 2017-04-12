@@ -8,21 +8,28 @@ namespace EncryptMessangerClient.Events
 {
     class DialogsRequestEventArgs:EventArgs
     {
-        private long _userId;
-        private int _dialogsCount;
+        //private long _userId;
 
-        public long UserId
+        public DialogsRequestEventArgs(int dialogsCount, int dialogsOffset)
         {
-            get
-            {
-                return _userId;
-            }
-
-            set
-            {
-                _userId = value;
-            }
+            _dialogsCount = dialogsCount;
+            _dialogsOffset = dialogsOffset;
         }
+        private int _dialogsCount;
+        private int _dialogsOffset;
+
+        //public long UserId
+        //{
+        //    get
+        //    {
+        //        return _userId;
+        //    }
+
+        //    set
+        //    {
+        //        _userId = value;
+        //    }
+        //}
 
         public int DialogsCount
         {
@@ -34,6 +41,19 @@ namespace EncryptMessangerClient.Events
             set
             {
                 _dialogsCount = value;
+            }
+        }
+
+        public int DialogsOffset
+        {
+            get
+            {
+                return _dialogsOffset;
+            }
+
+            set
+            {
+                _dialogsOffset = value;
             }
         }
     }

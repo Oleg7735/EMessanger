@@ -39,10 +39,13 @@ namespace EncryptMessangerClient
         public EventHandler<EncryptionSettingsEventArgs> EncryptionSettingsChanged;
         //Обработчик при получении диалогов пользователя
         public EventHandler<DialogsReceivedEventArgs> DilogsReceived;
+        public EventHandler<ClientAuthSuccessEventArgs> AuthSuccess;
+        public EventHandler<DialogUserInfoReceivedEventArgs> UserInfoReceived;
         //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
 
         private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
         private string _currentUserLogin = "user2";
+        private long _currentUserId;
         private string _currentUserPassword = "222";
         private Queue<TextMessage> _messageQueue = new Queue<TextMessage>();
         private bool isLocked = false;
@@ -76,7 +79,7 @@ namespace EncryptMessangerClient
         {
             for (int i = 0; i < _sessions.Count; i++)
             {
-                if (_sessions[i].Interlocutor.Equals(session.Interlocutor))
+                if (_sessions[i].Dialog == session.Dialog)
                 {
                     _sessions[i] = session;
                     return;
@@ -84,14 +87,15 @@ namespace EncryptMessangerClient
             }
             _sessions.Add(session);
         }
-        private ClientClientEncryptedSession FindSession(string interlocutor)
+        private ClientClientEncryptedSession FindSession(long dialogId)
         {
             for (int i = 0; i < _sessions.Count; i++)
             {
-                if (_sessions[i].Interlocutor.Equals(interlocutor))
+                if (_sessions[i].Dialog == dialogId)
                 {
                     return _sessions[i];
                 }
+
             }
             return null;
         }
@@ -120,7 +124,7 @@ namespace EncryptMessangerClient
                         case MessageType.CreateCryptoSessionRequest:
                             {
                                 CreateCryptoSessionRequest request = newMessage as CreateCryptoSessionRequest;
-                                _messageWriter.WriteMessage(new CreateCryptoSessionResponse(request.From, _currentUserLogin, true));
+                                _messageWriter.WriteMessage(new CreateCryptoSessionResponse(request.Dialog, request.From, _currentUserId, true));
                                 break;
                             }
                         case MessageType.CreateCryptoSessionResponse:
@@ -129,7 +133,7 @@ namespace EncryptMessangerClient
                                 if (response.Response)
                                 {
                                     EncryptionProvider enc = new EncryptionProvider();
-                                    ClientClientEncryptedSession newSession = enc.ClientClientSenderEncrypt(_messageWriter, _messageReder, _currentUserLogin, response.From);
+                                    ClientClientEncryptedSession newSession = enc.ClientClientSenderEncrypt(_messageWriter, _messageReder, response.Dialog, response.From);
                                     _sessions.Add(newSession);
                                 }
                                 ReleaseClient();
@@ -156,7 +160,7 @@ namespace EncryptMessangerClient
                             {
                                 ClientAKeyMessage keyMessage = newMessage as ClientAKeyMessage;
                                 EncryptionProvider enc = new EncryptionProvider();
-                                ClientClientEncryptedSession newSession = enc.ClientClientResiverEncrypt(_messageWriter, _messageReder, _currentUserLogin, keyMessage);
+                                ClientClientEncryptedSession newSession = enc.ClientClientResiverEncrypt(_messageWriter, _messageReder, _currentUserId, keyMessage);
                                 SessionAddOrReplase(newSession);
                                 break;
                             }
@@ -188,9 +192,17 @@ namespace EncryptMessangerClient
                             {
                                 
                                 DialogsResponceMessage dialogsRespoce = newMessage as DialogsResponceMessage;
+
                                 DilogsReceived?.Invoke(this, new DialogsReceivedEventArgs(dialogsRespoce.GetDialogsInfo()));
                                 break;
                                 
+                            }
+                        case MessageType.UserInfoResponceMessage:
+                            {
+                                UserInfoResponceMessage userInfoResponce = newMessage as UserInfoResponceMessage;
+
+                                UserInfoReceived?.Invoke(this, new DialogUserInfoReceivedEventArgs(userInfoResponce.UserId, userInfoResponce.Login));
+                                break;
                             }
                         case MessageType.EndStreamMessage:
                             {
@@ -212,11 +224,11 @@ namespace EncryptMessangerClient
         {
             _client.Connect(_serverIP, _serverPort);
         }
-        private void OnResiveMessages(string message, string from, bool isAltered)
+        private void OnResiveMessages(string message, long from, bool isAltered)
         {
             Resive?.Invoke(this, new NewMessageEventArgs(message, from, isAltered));
         }
-        public void SendMessage(string message, string to)
+        public void SendMessage(string message, long to)
         {
             if (!isLocked)
             {
@@ -228,7 +240,7 @@ namespace EncryptMessangerClient
                     //_messageList.Add(new TextMessage(_currentUserLogin, to, session.Encrypt(Encoding.UTF8.GetBytes(message))));
                     //TextMessage newTextMessage = new TextMessage(_currentUserLogin, to, session.Encrypt(Encoding.UTF8.GetBytes(message)));
                     //newTextMessage.AddSignature(session.CreateSign(newTextMessage.byteText));
-                    TextMessage newTextMessage = new TextMessage(_currentUserLogin, to, message);
+                    TextMessage newTextMessage = new TextMessage(_currentUserId, to, message);
                     session.TransformMessage(newTextMessage);
                     _messageWriter.WriteMessage(newTextMessage);
                 }
@@ -236,8 +248,8 @@ namespace EncryptMessangerClient
                 {
                     //блокировать отправку сообщений на время установления сессии(сообщения помещаютс в очередь _messageQueue)
                     LockClient();
-                    _messageQueue.Enqueue(new TextMessage(_currentUserLogin, to, message));
-                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(to, _currentUserLogin));
+                    _messageQueue.Enqueue(new TextMessage(_currentUserId, to, message));
+                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(to, _currentUserId));
                     //WriteClientClientMesssage(new TextMessage(_currentUserLogin, to, message));
                     //_messageList.Add(new CreateCryptoSessionRequest(to, _currentUserLogin));
                     //EncryptionProvider enc = new EncryptionProvider();
@@ -249,14 +261,14 @@ namespace EncryptMessangerClient
             }
             else
             {
-                _messageQueue.Enqueue(new TextMessage(_currentUserLogin, to, message));
+                _messageQueue.Enqueue(new TextMessage(_currentUserId, to, message));
             }
 
         }
-        //private ClientClientEncryptedSession FindSession(string interlocutor)
+        //private ClientClientEncryptedSession FindSession(string dialogId)
         //{
         //    ClientClientEncryptedSession session = (from Session in _sessions
-        //    where Session.Interlocutor.Equals(interlocutor)
+        //    where Session.dialogId.Equals(dialogId)
         //    select Session).Single();
         //    return session;
         //}
@@ -273,9 +285,10 @@ namespace EncryptMessangerClient
         {
             String strHostName = Dns.GetHostName();
             IPHostEntry iphostentry = Dns.GetHostEntry(strHostName);
-            
-            
-            return iphostentry.AddressList[6].ToString();
+            IPAddress[] ipv4Adreses = iphostentry.AddressList.Where(x=>x.AddressFamily == AddressFamily.InterNetwork).ToArray();
+
+
+            return ipv4Adreses[ipv4Adreses.Length - 1].ToString();
         }
         private void LockClient()
         {
@@ -288,7 +301,7 @@ namespace EncryptMessangerClient
             {
                 // _messageWriter.WriteMessage(_messageQueue.Dequeue());
                 TextMessage message = _messageQueue.Dequeue();
-                SendMessage(message.Text, message.To);
+                SendMessage(message.Text, message.Dialog);
             }
 
         }
@@ -298,9 +311,9 @@ namespace EncryptMessangerClient
         //    _messageReder = new MessageReader(_client.GetStream());
 
         //}
-        public void RequesForDialog(long userId, int dialogsCount)
+        public void RequesForDialog( int dialogsCount, int dialogsOffset)
         {
-            DialogsRequestMessage dialogsRequest = new DialogsRequestMessage(userId, dialogsCount);
+            DialogsRequestMessage dialogsRequest = new DialogsRequestMessage( dialogsCount, dialogsOffset);
             _messageWriter.WriteMessage(dialogsRequest);
         }
         public bool Auth(string login, string password)
@@ -310,13 +323,14 @@ namespace EncryptMessangerClient
             {
                 _currentUserLogin = login;
                 _currentUserPassword = password;
+                AuthSuccess?.Invoke(this, new ClientAuthSuccessEventArgs(auth.ClientId, auth.Login));
                 return true;
             }
             AuthError?.Invoke(this, new AuthErrorEventArgs(auth.CurrentError));
             return false;
 
         }
-        public void ExportKeys(string dialog, string fileName)
+        public void ExportKeys(long dialog, string fileName)
         {
             ClientClientEncryptedSession session = FindSession(dialog);
             if (session != null)
@@ -325,16 +339,22 @@ namespace EncryptMessangerClient
             }
 
         }
-        private void SetSessionEncrSettings(string dialog, bool useSign, bool useEncrypt)
+        private void SetSessionEncrSettings(long dialog, bool useSign, bool useEncrypt)
         {
             ClientClientEncryptedSession session = FindSession(dialog);
             session.UseEncryption = useEncrypt;
             session.UseSignature = useSign;
         }
-        public void ChangeEncryptionSettings(string dialog, bool useSign, bool useEncrypt)
+
+
+        public void UpdateDialogEncryptionKeys(long dialogId, long userId)
+        {
+            new CreateCryptoSessionRequest(dialogId, userId);
+        }
+        public void ChangeEncryptionSettings(long dialog, bool useSign, bool useEncrypt)
         {
             SetSessionEncrSettings( dialog, useSign, useEncrypt);
-            _messageWriter.WriteMessage(new DialogEncryptionSettingsMessage(dialog, _currentUserLogin,useSign,useEncrypt));
+            _messageWriter.WriteMessage(new DialogEncryptionSettingsMessage(dialog, _currentUserId,useSign,useEncrypt));
         }
         public bool RegistrateAntAuth(RegistrationInfo registrationInfo)
         {
@@ -344,7 +364,7 @@ namespace EncryptMessangerClient
             ClientRegistrator registrator = new ClientRegistrator();
             if(registrator.Registrate(_messageWriter, _messageReder, login, password))
             {
-                RegistrationSuccess?.Invoke(this, new RegistrationSuccessEventArgs(login));
+                RegistrationSuccess?.Invoke(this, new RegistrationSuccessEventArgs(login, registrator.UserId));
                 return true;
             }
             else
@@ -353,10 +373,14 @@ namespace EncryptMessangerClient
                 return false;
             }
         }
+        public void RequestUserInfo(long userId)
+        {
+            _messageWriter.WriteMessage(new UserInfoRequestMessage(userId));
+        }
         public void Stop()
         {
-
             _messageWriter.WriteMessage(new EndStreamMessage());
+
         }
         public void Close()
         {

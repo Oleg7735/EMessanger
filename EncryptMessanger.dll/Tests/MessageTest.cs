@@ -14,16 +14,16 @@ namespace EncryptMessanger.dll.Tests
         [Test]
         public void TextMessageText()
         {
-            TextMessage message = new TextMessage("user1","user2","new text");
+            TextMessage message = new TextMessage(1,1,"new text");
             byte[] b = message.ToByte();
             TextMessage recreatetMessage = Message.CreateMessage(b) as TextMessage;
-            Assert.That(message.To.Equals(recreatetMessage.To)&& message.From.Equals(recreatetMessage.From)&& message.Text.Equals(recreatetMessage.Text));
+            Assert.That(message.Dialog == recreatetMessage.Dialog && message.From.Equals(recreatetMessage.From)&& message.Text.Equals(recreatetMessage.Text));
 
         }
         [Test]
         public void TextMessageToStringTest()
         {
-            TextMessage message = new TextMessage("user1", "user2", "new text");
+            TextMessage message = new TextMessage(1, 1, "new text");
             byte[] sign = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 };
             message.AddSignature(sign);
             string s = message.ToString();
@@ -34,7 +34,7 @@ namespace EncryptMessanger.dll.Tests
         [Test]
         public void TextMessageConstrTest()
         {
-            TextMessage message = new TextMessage("user1", "user2", "new text");
+            TextMessage message = new TextMessage(1, 1, "new text");
             byte[] sign = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
             message.AddSignature(sign);
             Assert.That(message.Atributes.Count == 4&& message.Type == MessageType.TextMessage&& 

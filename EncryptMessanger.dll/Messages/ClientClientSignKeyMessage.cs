@@ -8,13 +8,13 @@ namespace EncryptMessanger.dll.Messages
 {
     public class ClientClientSignKeyMessage:ClientAKeyMessage
     {
-        public ClientClientSignKeyMessage(string key, string to, string from)
+        public ClientClientSignKeyMessage(string key, long dialogId, long currentUserId)
         {
             _type = MessageType.ClientClientSignKeyMessage;
 
             _atributes.Add(new MessageAtribute(Atribute.Key, Encoding.UTF8.GetBytes(key)));
-            setAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            setAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
+            SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(dialogId)));
+            SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(currentUserId)));
             // _atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
            // _atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             //_atributes.Add(new MessageAtribute("key",key));

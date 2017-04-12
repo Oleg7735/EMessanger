@@ -12,15 +12,15 @@ namespace EncryptMessanger.dll.Messages
         {
             _type = MessageType.DialogEncryptionSettingsMessage;
         }
-        public DialogEncryptionSettingsMessage(string to, string from, bool useSign, bool useEncryption)
+        public DialogEncryptionSettingsMessage(long dialogId, long currentUserId, bool useSign, bool useEncryption)
         {
             _type = MessageType.DialogEncryptionSettingsMessage;
             _atributes.Add(new MessageAtribute(Atribute.UseEncryption, BitConverter.GetBytes(useEncryption)));
             _atributes.Add(new MessageAtribute(Atribute.UseSignature, BitConverter.GetBytes(useSign)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
-            To = to;
-            From = from;
+            Dialog = dialogId;
+            From = currentUserId;
         }
         //public string To
         //{
