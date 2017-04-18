@@ -27,9 +27,11 @@ namespace EncryptMessanger.dll.Messages
 
             _atributes.Add(new MessageAtribute(Atribute.IV, initialVector));
             _atributes.Add(new MessageAtribute(Atribute.Key, key));
-            SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(dialogId)));
+            Dialog = dialogId;
+            From = currentUserId;
+            //SetAtributeValue(new MessageAtribute(Atribute.Dialog, BitConverter.GetBytes(dialogId)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
-            SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(currentUserId)));
+            //SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(currentUserId)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
         }

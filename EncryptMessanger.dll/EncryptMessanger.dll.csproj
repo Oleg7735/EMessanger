@@ -64,7 +64,9 @@
     <Compile Include="Authentification\ClientRegistrator.cs" />
     <Compile Include="Authentification\ServerRegistrationHandler.cs" />
     <Compile Include="Encription\ClientClientEncryptedSession.cs" />
+    <Compile Include="Encription\EncriptionParams.cs" />
     <Compile Include="Encription\EncryptionProvider.cs" />
+    <Compile Include="Encription\SessionIO.cs" />
     <Compile Include="MessageAtribute.cs" />
     <Compile Include="MessageReader.cs" />
     <Compile Include="Messages\AKeyMessage.cs" />
@@ -106,6 +108,7 @@
     <Compile Include="Tests\DialogSendibleInfoTest.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />
+    <Compile Include="Tests\SessionIOTest.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

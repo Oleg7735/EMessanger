@@ -9,21 +9,21 @@ namespace EncryptMessangerClient.Events
     class MessageSendEventArgs
     {
         private string _message;
-        private long _to;
+        private long _dialogId;
         public string Message
         {
             get { return _message; }
         }
-        public long To
+        public long DialogId
         {
-            get { return _to; }
+            get { return _dialogId; }
         }
         
 
-        public MessageSendEventArgs(string message, long to)
+        public MessageSendEventArgs(string message, long dialogId)
         {
             _message = message;
-            _to = to;
+            _dialogId = dialogId;
         }
     }
 }

@@ -110,5 +110,15 @@ namespace EncryptMessangerClient.Model
             _sign = sign;
             MembersId = membersId;
         }
+
+        public void BindMessagesToAuthor(UserInfo newUserInfo)
+        {
+            var q = _dialogMessages.Where(m => m.AuthorInfo.Id == newUserInfo.Id);
+            foreach(DialogMessage message in q)
+            {
+                message.AuthorInfo = newUserInfo;
+            }
+        }
+
     }
 }

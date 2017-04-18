@@ -104,7 +104,7 @@ namespace EncryptMessangerClient
         }
         private void SendMessage(object sender, MessageSendEventArgs e)
         {
-            CurrentClient.SendMessage(e.Message, e.To);
+            CurrentClient.SendMessage(e.Message, e.DialogId);
         }
         private void OnClientStop(object sender, EventArgs e)
         {

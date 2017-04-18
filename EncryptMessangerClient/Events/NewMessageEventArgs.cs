@@ -38,11 +38,12 @@ namespace EncryptMessangerClient
             }
         }
 
-        public NewMessageEventArgs(string message, long from, bool isAltered)
+        public NewMessageEventArgs(string message, long dialogId, long from, bool isAltered)
         {
             _message = message;
             _from = from;
             _isAltered = isAltered;
+            _dialogId = dialogId;
         }
 
     }

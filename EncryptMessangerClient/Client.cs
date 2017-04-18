@@ -167,12 +167,12 @@ namespace EncryptMessangerClient
                         case MessageType.TextMessage:
                             {
                                 TextMessage newTextMessage = newMessage as TextMessage;
-                                ClientClientEncryptedSession session = FindSession(newTextMessage.From);
+                                ClientClientEncryptedSession session = FindSession(newTextMessage.Dialog);
                                 if (session == null)
                                 {
                                     throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
                                 }
-                                OnResiveMessages(Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.From, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature()));
+                                OnResiveMessages(Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature()));
                                 //if(session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature()))
                                 //{
                                 //    //код выполняющийся при совпадени хешей
@@ -224,15 +224,15 @@ namespace EncryptMessangerClient
         {
             _client.Connect(_serverIP, _serverPort);
         }
-        private void OnResiveMessages(string message, long from, bool isAltered)
+        private void OnResiveMessages(string message, long dialogId, long from, bool isAltered)
         {
-            Resive?.Invoke(this, new NewMessageEventArgs(message, from, isAltered));
+            Resive?.Invoke(this, new NewMessageEventArgs(message, dialogId, from, isAltered));
         }
-        public void SendMessage(string message, long to)
+        public void SendMessage(string message, long dialogId)
         {
             if (!isLocked)
             {
-                ClientClientEncryptedSession session = FindSession(to);
+                ClientClientEncryptedSession session = FindSession(dialogId);
                 //сессия найдена
                 if (session != null)
                 {
@@ -240,7 +240,7 @@ namespace EncryptMessangerClient
                     //_messageList.Add(new TextMessage(_currentUserLogin, to, session.Encrypt(Encoding.UTF8.GetBytes(message))));
                     //TextMessage newTextMessage = new TextMessage(_currentUserLogin, to, session.Encrypt(Encoding.UTF8.GetBytes(message)));
                     //newTextMessage.AddSignature(session.CreateSign(newTextMessage.byteText));
-                    TextMessage newTextMessage = new TextMessage(_currentUserId, to, message);
+                    TextMessage newTextMessage = new TextMessage(_currentUserId, dialogId, message);
                     session.TransformMessage(newTextMessage);
                     _messageWriter.WriteMessage(newTextMessage);
                 }
@@ -248,8 +248,8 @@ namespace EncryptMessangerClient
                 {
                     //блокировать отправку сообщений на время установления сессии(сообщения помещаютс в очередь _messageQueue)
                     LockClient();
-                    _messageQueue.Enqueue(new TextMessage(_currentUserId, to, message));
-                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(to, _currentUserId));
+                    _messageQueue.Enqueue(new TextMessage(_currentUserId, dialogId, message));
+                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(dialogId, _currentUserId));
                     //WriteClientClientMesssage(new TextMessage(_currentUserLogin, to, message));
                     //_messageList.Add(new CreateCryptoSessionRequest(to, _currentUserLogin));
                     //EncryptionProvider enc = new EncryptionProvider();
@@ -261,7 +261,7 @@ namespace EncryptMessangerClient
             }
             else
             {
-                _messageQueue.Enqueue(new TextMessage(_currentUserId, to, message));
+                _messageQueue.Enqueue(new TextMessage(_currentUserId, dialogId, message));
             }
 
         }

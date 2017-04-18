@@ -73,9 +73,14 @@ namespace EncryptMessangerClient.ViewModel
                         _currentDialog = _dialogs[_dialogSelectedIndex];
                         foreach(long id in _currentDialog.MembersId)
                         {
-                            if(_contacts.Find(x => x.Id == id) == null)
+                            UserInfo author = _contacts.Find(x => x.Id == id);
+                            if (author == null)
                             {
                                 RequestUserInfo(id);
+                            }
+                            else
+                            {
+                                _currentDialog.BindMessagesToAuthor(author);
                             }
                         }
                         LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 0, 20));
@@ -85,6 +90,7 @@ namespace EncryptMessangerClient.ViewModel
                     MessageSendCommand.RaiseCanExecuteChanged();
                     ExportKeysCommand.RaiseCanExecuteChanged();
                     EncryptSessionCommand.RaiseCanExecuteChanged();
+                    UpdateDialogEncryptionKeysCommand.RaiseCanExecuteChanged(); 
                 }
             }
         }
@@ -115,13 +121,14 @@ namespace EncryptMessangerClient.ViewModel
             UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
             if(authorInfo == null)
             {
-                RequestUserInfo(interlocutor);
-                
+                //RequestUserInfo(interlocutor);
+                _dialogs.GetById(dialog).DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, isAltered));
+
             }
             else
             {
                 _dialogs.GetById(dialog).DialogMessages.Add(new DialogMessage(authorInfo, text, isAltered));
-
+                
             }
             //OnPropertyChanged("Messages");
 
@@ -282,7 +289,10 @@ namespace EncryptMessangerClient.ViewModel
         public void AddContact(UserInfo userInfo)
         {
             _contacts.Add(userInfo);
-
+            if (CurrentDialog != null)
+            {
+                CurrentDialog.BindMessagesToAuthor(userInfo);
+            }
         }
         /// <summary>
         ///  используется ли электронная цифровая подпись для выбранного пользователем диалога

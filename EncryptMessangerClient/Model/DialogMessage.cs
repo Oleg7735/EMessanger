@@ -17,10 +17,38 @@ namespace EncryptMessangerClient.Model
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public UserInfo Author
+        public string Author
         {
-            get { return _author; }
+            get
+            {
+                if (_author != null)
+                {
+                    return _author.Login;
+                }
+                else
+                {
+                    return "";
+                }
+            }
         }
+        public UserInfo AuthorInfo
+        {
+            get
+            {
+                return _author;
+            }
+            set
+            {
+                _author = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Author"));
+            }
+        }
+
+        //public void SetAuthor(UserInfo author)
+        //{
+        //    _author = author;
+        //    //PropertyChanged.Invoke("Messages");
+        //}
         public string Text
         {
             get { return _text; }
@@ -47,10 +75,15 @@ namespace EncryptMessangerClient.Model
             _text = text;
             _author = author;
         }
+        public DialogMessage( string text, bool isAltered)
+        {
+            _isAltered = isAltered;
+            _text = text;            
+        }
 
         public bool Equals(DialogMessage other)
         {
-            return other.Author.Equals(this.Author) && other.Text.Equals(this.Text) && (other._isAltered == _isAltered);
+            return other.AuthorInfo.Id == this.AuthorInfo.Id && other.Text.Equals(this.Text) && (other._isAltered == _isAltered);
         }
     }
 }

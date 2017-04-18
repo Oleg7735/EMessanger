@@ -33,6 +33,8 @@ namespace EncryptMessanger.dll.Encription
             get { return _dialogId; }
         }
 
+        
+
         public ClientClientEncryptedSession(AesManaged aes, long dialogId, RSACryptoServiceProvider rsaToSign, RSACryptoServiceProvider rsaToVerify)
         {
             _dialogId = dialogId;
@@ -117,6 +119,31 @@ namespace EncryptMessanger.dll.Encription
             if(UseSignature)
             {
                 message.AddSignature(CreateSign(message.byteText));
+            }
+        }
+        public byte[] IV
+        {
+            get { return _aes.IV; }            
+        }
+        public byte[] EncryptionKey
+        {
+            get { return _aes.Key; }
+        }
+
+        public RSACryptoServiceProvider RsaToSign
+        {
+            get
+            {
+                return _rsaToSign;
+            }
+            
+        }
+
+        public RSACryptoServiceProvider RsaToVerify
+        {
+            get
+            {
+                return _rsaToVerify;
             }
         }
     }

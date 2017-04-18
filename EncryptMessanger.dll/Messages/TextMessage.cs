@@ -48,21 +48,21 @@ namespace EncryptMessanger.dll.Messages
         {
             init();
         }
-        public TextMessage(long from, long to, string text)
+        public TextMessage(long from, long dialog, string text)
         {
             init();
-            SetAtributeValue(new MessageAtribute(Atribute.To, BitConverter.GetBytes(to)));
+            SetAtributeValue(new MessageAtribute(Atribute.DialogId, BitConverter.GetBytes(dialog)));
             SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(from)));
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(text)));
         }
-        public TextMessage(string from, string to, byte[] text)
+        public TextMessage(string from, string dialog, byte[] text)
         {
             init();
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
-            SetAtributeValue(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
+            SetAtributeValue(new MessageAtribute(Atribute.DialogId, Encoding.UTF8.GetBytes(dialog)));
             SetAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, text));
         }

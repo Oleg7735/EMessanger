@@ -15,6 +15,10 @@ namespace EncryptMessangerClient.Model
         {
 
         }
+        public UserInfo(long id)
+        {
+            _id = id;            
+        }
         public UserInfo(long id, string login)
         {
             _id = id;
@@ -46,5 +50,6 @@ namespace EncryptMessangerClient.Model
                 _id = value;
             }
         }
+
     }
 }

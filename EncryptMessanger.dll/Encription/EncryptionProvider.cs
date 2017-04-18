@@ -88,6 +88,7 @@ namespace EncryptMessanger.dll.Encription
             RSACryptoServiceProvider decryptRsa = new RSACryptoServiceProvider();
             //для ЭЦП
             RSACryptoServiceProvider encryptRsaForSign = new RSACryptoServiceProvider();//предоставляет закрытый ключ для зашивровки хеша сообщений
+            
             RSACryptoServiceProvider decryptRsaForSign = new RSACryptoServiceProvider();//предоставляет открытый ключ получателя для расшифровки хеша ЭЦП
             //отправка публичного RSA ключа
             messageWriter.WriteMessage(new ClientAKeyMessage(decryptRsa.ToXmlString(false),dialogId,senderId));
