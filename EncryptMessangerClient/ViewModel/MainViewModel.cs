@@ -11,6 +11,7 @@ using EncryptMessangerClient.Model;
 using Microsoft.Win32;
 using System.IO;
 using EncryptMessangerClient.extensions;
+using EncryptMessangerClient.MessageBoxService;
 
 namespace EncryptMessangerClient.ViewModel
 {
@@ -19,6 +20,7 @@ namespace EncryptMessangerClient.ViewModel
         private const int _dialogsRequestCount = 20;
         private UserInfo _currentUser;
         private List<UserInfo> _contacts = new List<UserInfo>();
+        private IMsgBoxService _messageService;
         //private string _currentUserLogin;
 
         public string CurrentUserLogin
@@ -264,7 +266,10 @@ namespace EncryptMessangerClient.ViewModel
         }
         private void UpdateDialogEncryptionKeys()
         {
-            UpdateDialogKeys?.Invoke(this, new UpdateDialogEncryptionKeysEventArgs(Dialogs[DialogSelectedIndex].DialogId, _currentUser.Id));
+            if (_messageService.ShowQuestion("При обновлении ключей старые сообщения будут недоступны. Обновить ключи?"))
+            {
+                UpdateDialogKeys?.Invoke(this, new UpdateDialogEncryptionKeysEventArgs(Dialogs[DialogSelectedIndex].DialogId, _currentUser.Id));
+            }
         }
         
 
@@ -377,6 +382,19 @@ namespace EncryptMessangerClient.ViewModel
 
                     //EncryptSettingChanged?.Invoke(this, new EncryptionSettingsEventArgs(_sign, _encrypt));
                 }
+            }
+        }
+
+        public IMsgBoxService MessageService
+        {
+            get
+            {
+                return _messageService;
+            }
+
+            set
+            {
+                _messageService = value;
             }
         }
 

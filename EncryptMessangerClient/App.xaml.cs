@@ -11,6 +11,7 @@ using EncryptMessangerClient.Model;
 using System.ComponentModel;
 using EncryptMessanger.dll.SendibleData;
 using EncryptMessangerClient.extensions;
+using EncryptMessangerClient.MessageBoxService;
 
 namespace EncryptMessangerClient
 {
@@ -27,6 +28,7 @@ namespace EncryptMessangerClient
         private EncryptionSettings _encrytionSettingsForm;
         private RegistrationForm _registrationWindow;
         private RegistrationViewModel _registrationViewModel;
+        private MsgBoxService _messageService = new MsgBoxService();
 
 
         protected override void OnStartup(StartupEventArgs e)
@@ -178,6 +180,7 @@ namespace EncryptMessangerClient
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
                     vm.CurrentUserLogin = login;
                     vm.CurrentUserId = userId;
+                    vm.MessageService = _messageService;
                 });
             }
             
