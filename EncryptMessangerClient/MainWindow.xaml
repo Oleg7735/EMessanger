@@ -8,26 +8,26 @@
         xmlns:m="clr-namespace:EncryptMessangerClient.Model"
         mc:Ignorable="d"
         x:Uid="mainWindow"
-        Title="EncryptedMessangerClient" Height="362" Width="549" 
-        >    
+        Title="EncryptedMessangerClient" Height="404" Width="679" 
+        >
     <Window.DataContext>
         <vm:MainViewModel />
-    </Window.DataContext>    
-    <Grid>        
+    </Window.DataContext>
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*"></ColumnDefinition>
-            <ColumnDefinition Width="1.5*"></ColumnDefinition>
+            <ColumnDefinition Width="2*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="1" Grid.Row="1">
-            <Grid.RowDefinitions>                
-                <RowDefinition Height="4*"></RowDefinition>
-                <RowDefinition  Height="1.5*"></RowDefinition>
-                <RowDefinition></RowDefinition>                
-            </Grid.RowDefinitions>            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5*"></RowDefinition>
+                <RowDefinition  Height="1.2*"></RowDefinition>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
             <ListBox Grid.Row="0" x:Name="messagesListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Messages}">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="m:DialogMessage">
@@ -42,7 +42,7 @@
                                 <Label Content="{Binding Text}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Label>
                                 <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Foreground="Red"></Label>
 
-                            </Grid>                            
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -56,14 +56,22 @@
                 <MenuItem Header="Экспорт ключей" Command="{Binding ExportKeysCommand}"></MenuItem>
                 <MenuItem Header="Настройки" Command="{Binding EncryptSessionCommand}"></MenuItem>
                 <MenuItem Header="Обновить ключи шифрования" Command="{Binding UpdateDialogEncryptionKeysCommand}"></MenuItem>
-            </MenuItem>            
+            </MenuItem>
         </Menu>
         <ListBox x:Name="dialogListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Dialogs}" SelectedIndex="{Binding DialogSelectedIndex}" Grid.Row="1">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="m:Dialog">
-                    <Border BorderBrush="Black" Margin="5" BorderThickness="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-                        <Label Content="{Binding Name}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Label>
+                    <Border BorderBrush="Black" Margin="5" BorderThickness="1" HorizontalAlignment="Stretch"  VerticalAlignment="Stretch">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition></RowDefinition>
+                                <RowDefinition></RowDefinition>
+                            </Grid.RowDefinitions>
+                            <Label Content="{Binding Name}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"></Label>
+                            <Label Content="{Binding SessionErrorMessage}" Foreground="Red" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Label>
+                        </Grid>
                     </Border>
+                    
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>

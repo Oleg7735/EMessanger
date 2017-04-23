@@ -12,12 +12,13 @@ public enum MessageType
     ClientSymKeyMessage, CreateCryptoSessionRequest, CreateCryptoSessionResponse,
     ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
     DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
-    DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage
+    DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage, 
+    DialogMessagesResponceMessage, DialogMessagesRequestMessage
 };
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
-    UseEncryption, UseSignature, DialogInfo, UserId, DialogsCount, DialogOffset, DialogId
+    UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime
 };
 namespace EncryptMessanger.dll.Messages
 {
@@ -310,7 +311,17 @@ namespace EncryptMessanger.dll.Messages
                     {
                         message = new EndStreamMessage();
                         break;
-                    }               
+                    }
+                case MessageType.DialogMessagesRequestMessage:
+                    {
+                        message = new DialogMessagesRequestMessage();
+                        break;
+                    }
+                case MessageType.DialogMessagesResponceMessage:
+                    {
+                        message = new DialogMessagesResponceMessage();
+                        break;
+                    }       
                 default:
                     {
                         throw new ArgumentException(String.Format("Не определено действие по созданию объекта сообщения для сообщения типа {0}", type.ToString()));

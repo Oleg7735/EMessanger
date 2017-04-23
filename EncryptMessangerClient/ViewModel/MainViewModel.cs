@@ -71,9 +71,10 @@ namespace EncryptMessangerClient.ViewModel
                     else
                     {
                         _currentDialog = _dialogs[_dialogSelectedIndex];
-                        foreach(long id in _currentDialog.MembersId)
+                        UserInfo author;
+                        foreach (long id in _currentDialog.MembersId)
                         {
-                            UserInfo author = _contacts.Find(x => x.Id == id);
+                            author = _contacts.Find(x => x.Id == id);
                             if (author == null)
                             {
                                 RequestUserInfo(id);
@@ -83,7 +84,7 @@ namespace EncryptMessangerClient.ViewModel
                                 _currentDialog.BindMessagesToAuthor(author);
                             }
                         }
-                        LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 0, 20));
+                        LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 20, 0));
                     }
                     OnPropertyChanged();
                     OnPropertyChanged("Messages");
@@ -115,23 +116,44 @@ namespace EncryptMessangerClient.ViewModel
         /// <param name="interlocutor">собеседник, от которого получено сообщение</param>
         /// <param name="text">текст собщения</param>
         /// <param name="isAltered">было ли сообщение изменено при передаче</param>
-        public void AddMessage(long interlocutor, long dialog, string text, bool isAltered)
+        public void AddMessages(DialogMessage[] messages, long dialogId)
+        {            
+            Dialog containerDialog = _dialogs.GetById(dialogId);
+            UserInfo authorInfo;
+            foreach (DialogMessage message in messages)
+            {
+                authorInfo = _contacts.Find(x => x.Id == message.AuthorInfo.Id);
+                message.AuthorInfo = authorInfo;
+                containerDialog.DialogMessages.Add(message);
+            }
+            containerDialog.DialogMessages.OrderByDescending(m => m.SendDate);
+        }
+        public void AddMessage(long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
         {
             //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
             UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
-            if(authorInfo == null)
+            try
+            {
+                Dialog containerDialog = _dialogs.GetById(dialog);
+            
+            if (authorInfo == null)
             {
                 //RequestUserInfo(interlocutor);
-                _dialogs.GetById(dialog).DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, isAltered));
-
+                
+                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, sendDate, isAltered));
+                
             }
             else
             {
-                _dialogs.GetById(dialog).DialogMessages.Add(new DialogMessage(authorInfo, text, isAltered));
+                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, text, sendDate, isAltered));
                 
             }
-            //OnPropertyChanged("Messages");
+                //OnPropertyChanged("Messages");
+            }
+            catch (ArgumentException)
+            {
 
+            }
         }
         private void RequestUserInfo(long userId)
         {
@@ -164,6 +186,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<UpdateDialogEncryptionKeysEventArgs> UpdateDialogKeys;
         public event EventHandler<LoadDialogUserInfoEventArgs> LoadDialogUserInfo;
         public event EventHandler<LoadDialogMessagesEventArgs> LoadDialogMessages;
+        public event EventHandler<LoadDialogSessionEventArgs> LoadDialogSession;
 
 
         public Command MessageSendCommand { get; private set; }
@@ -195,7 +218,7 @@ namespace EncryptMessangerClient.ViewModel
             if(CurrentDialog != null)
             {
                 MessageSend?.Invoke(this, new MessageSendEventArgs(_messageBox, CurrentDialog.DialogId));
-                CurrentDialog.DialogMessages.Add(new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), _messageBox, false));
+                CurrentDialog.DialogMessages.Add(new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), _messageBox, DateTime.Now, false));
                 MessageBox = "";
                 
             }
@@ -244,6 +267,11 @@ namespace EncryptMessangerClient.ViewModel
             UpdateDialogKeys?.Invoke(this, new UpdateDialogEncryptionKeysEventArgs(Dialogs[DialogSelectedIndex].DialogId, _currentUser.Id));
         }
         
+
+        private void _loadSessionForDialog(long dialogId)
+        {
+            LoadDialogSession?.Invoke(this, new LoadDialogSessionEventArgs(dialogId));
+        }
 
         public MainViewModel()
         {
@@ -350,6 +378,23 @@ namespace EncryptMessangerClient.ViewModel
                     //EncryptSettingChanged?.Invoke(this, new EncryptionSettingsEventArgs(_sign, _encrypt));
                 }
             }
+        }
+
+        public void AddDialog(Dialog dialog)
+        {
+            if (!_dialogs.Contains(dialog))
+            {
+                _dialogs.Add(dialog);
+                _loadSessionForDialog(dialog.DialogId);
+            }
+        }
+        public void OnDialogSessionFaild(object sender, DialogSessionFaildEventArgs arg)
+        {
+            Dialogs.GetById(arg.DialogId).AddSessionErrorMessage(arg.ErrorMessage);
+        }
+        public void OnDialogSessionSuccess(object sender, DialogSessionSuccessEventArgs arg)
+        {
+            Dialogs.GetById(arg.DialogId).ClearDialogSessionError();
         }
     }
 }

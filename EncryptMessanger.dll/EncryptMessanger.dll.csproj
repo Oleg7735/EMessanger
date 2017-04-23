@@ -82,6 +82,8 @@
     <Compile Include="Messages\CreateCryptoSessionRequest.cs" />
     <Compile Include="Messages\CreateCryptoSessionResponse.cs" />
     <Compile Include="Messages\DialogEncryptionSettingsMessage.cs" />
+    <Compile Include="Messages\DialogMessagesRequestMessage.cs" />
+    <Compile Include="Messages\DialogMessagesResponceMessage.cs" />
     <Compile Include="Messages\DialogsRequestMessage.cs" />
     <Compile Include="Messages\DialogsResponceMessage.cs" />
     <Compile Include="Messages\EndStreamMessage.cs" />
@@ -105,9 +107,11 @@
     </Compile>
     <Compile Include="SendibleData\DialogSendibleInfo.cs" />
     <Compile Include="SendibleData\ISendibleData.cs" />
+    <Compile Include="SendibleData\MessageSendibleInfo.cs" />
     <Compile Include="Tests\DialogSendibleInfoTest.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />
+    <Compile Include="Tests\MesssageSendibleDataTest.cs" />
     <Compile Include="Tests\SessionIOTest.cs" />
   </ItemGroup>
   <ItemGroup />

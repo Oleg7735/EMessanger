@@ -53,13 +53,19 @@ namespace EncryptMessanger.dll.Encription
         {
             if (UseEncryption)
             {
-                return _decryptor.TransformFinalBlock(data, 0, data.Length);
+                byte[] decryptedData = _decryptor.TransformFinalBlock(data, 0, data.Length);
+                _decryptor = _aes.CreateDecryptor();
+                return decryptedData;
             }
             return data;
         }
         public byte[] Encrypt(byte[] data)
         {
-            return _encryptor.TransformFinalBlock(data, 0, data.Length);
+            //byte[] startIV = _aes.IV;
+            byte[] encryptedData = _encryptor.TransformFinalBlock(data, 0, data.Length);
+            _encryptor = _aes.CreateEncryptor();
+            //_aes.IV = startIV;
+            return encryptedData;
         }
         public byte[] CreateSign(byte[] data)
         {
@@ -113,8 +119,8 @@ namespace EncryptMessanger.dll.Encription
         public void TransformMessage(TextMessage message)
         {
             if (UseEncryption)
-            {
-                message.byteText = Encrypt(message.byteText);
+            {               
+                message.byteText = Encrypt(message.byteText);               
             }
             if(UseSignature)
             {

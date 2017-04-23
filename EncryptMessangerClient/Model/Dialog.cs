@@ -16,6 +16,8 @@ namespace EncryptMessangerClient.Model
         private bool _sign = true;
         private bool _encrypt = true;
         private string _dialogName;
+        private string _sessionErrorMessage;
+        //public bool _showError = false;
         private ObservableCollection<DialogMessage> _dialogMessages = new ObservableCollection<DialogMessage>();
         public ObservableCollection<DialogMessage> DialogMessages
         {
@@ -39,7 +41,7 @@ namespace EncryptMessangerClient.Model
             {
                 if(value != _sign)
                 {
-                    _sign = value;
+                    _sign = value; 
                 }
             }
         }
@@ -114,10 +116,44 @@ namespace EncryptMessangerClient.Model
         public void BindMessagesToAuthor(UserInfo newUserInfo)
         {
             var q = _dialogMessages.Where(m => m.AuthorInfo.Id == newUserInfo.Id);
-            foreach(DialogMessage message in q)
+            foreach (DialogMessage message in q)
             {
                 message.AuthorInfo = newUserInfo;
             }
+        }
+        public string SessionErrorMessage
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_sessionErrorMessage))
+                    return "";
+                else
+                {
+                    return _sessionErrorMessage;
+                }
+            }
+            set
+            {
+                if(!String.IsNullOrEmpty(value) && !String.IsNullOrWhiteSpace(value))
+                {
+                    _sessionErrorMessage = value;
+                    //_showError = 
+                    OnPropertyChanged();
+                }
+                else
+                {
+                    _sessionErrorMessage = "";
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public void AddSessionErrorMessage(string error)
+        {
+            SessionErrorMessage = error;
+        }
+        public void ClearDialogSessionError()
+        {
+            SessionErrorMessage = "";
         }
 
     }

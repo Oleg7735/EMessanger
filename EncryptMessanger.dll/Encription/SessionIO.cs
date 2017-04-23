@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EncryptMessanger.dll.Encription
 {
-    class SessionIO
+    public class SessionIO
     {       
 
         public ClientClientEncryptedSession LoadSession(long dialogID, string fileName)
@@ -26,9 +26,9 @@ namespace EncryptMessanger.dll.Encription
                 cspSign.KeyContainerName = dialogID.ToString() + EncriptionParams.RsaSignKeyMark;
                 rsaToSign = new RSACryptoServiceProvider(cspSign);
 
-                CspParameters cspVerify = new CspParameters();
-                cspVerify.KeyContainerName = dialogID.ToString() + EncriptionParams.RsaVerifyKeyMark;
-                rsaToVerify = new RSACryptoServiceProvider(cspVerify);
+                //CspParameters cspVerify = new CspParameters();
+                //cspVerify.KeyContainerName = dialogID.ToString() + EncriptionParams.RsaVerifyKeyMark;
+                //rsaToVerify = new RSACryptoServiceProvider(cspVerify);
             }
             catch(CryptographicException)
             {                
@@ -42,7 +42,7 @@ namespace EncryptMessanger.dll.Encription
             {
                 while (dialogIdFromFile != dialogID)
                 {
-                    reader.BaseStream.Seek(EncriptionParams.AesEncrIVSize + EncriptionParams.AesEncrKeySize, SeekOrigin.Current);
+                    reader.BaseStream.Seek(EncriptionParams.AesEncrIVSize + EncriptionParams.AesEncrKeySize + EncriptionParams.RsaVerifyKeyXmlSize, SeekOrigin.Current);
                     dialogIdFromFile = reader.ReadInt64();
                 }
             }
@@ -53,6 +53,11 @@ namespace EncryptMessanger.dll.Encription
             }
             byte[] aesEncrIV = reader.ReadBytes(EncriptionParams.AesEncrIVSize);
             byte[] aesEncrKey = reader.ReadBytes(EncriptionParams.AesEncrKeySize);
+            byte[] rsaVerifyKey = reader.ReadBytes(EncriptionParams.RsaVerifyKeyXmlSize);
+
+            rsaToVerify = new RSACryptoServiceProvider();
+            rsaToVerify.FromXmlString(Encoding.UTF8.GetString(rsaVerifyKey));
+            rsaToVerify.PersistKeyInCsp = false;
 
             reader.Close();
             byte[] IV = rsaToDecryptKey.Decrypt(aesEncrIV, true);
@@ -77,13 +82,12 @@ namespace EncryptMessanger.dll.Encription
             signRsa.ImportParameters(session.RsaToSign.ExportParameters(true));
             signRsa.PersistKeyInCsp = true;
 
-            //сохраняем Rsa публичный ключ для поверки ЭЦП
-            CspParameters cspVerify = new CspParameters();
-            cspVerify.KeyContainerName = session.Dialog.ToString() + EncriptionParams.RsaVerifyKeyMark;
-            RSACryptoServiceProvider verifyRsa = new RSACryptoServiceProvider(cspVerify);
-            verifyRsa.ImportParameters(session.RsaToVerify.ExportParameters(true));
-            verifyRsa.PersistKeyInCsp = true;
-
+            ////сохраняем Rsa публичный ключ для поверки ЭЦП
+            //CspParameters cspVerify = new CspParameters();
+            //cspVerify.KeyContainerName = session.Dialog.ToString() + EncriptionParams.RsaVerifyKeyMark;
+            //RSACryptoServiceProvider verifyRsa = new RSACryptoServiceProvider(cspVerify);
+            //verifyRsa.ImportParameters(session.RsaToVerify.ExportParameters(false));
+            
             //CspParameters для шифрования симметричного Aes ключа
             CspParameters cspEncrypt = new CspParameters();
             cspEncrypt.KeyContainerName = session.Dialog.ToString() + EncriptionParams.RsaEncryptionKeyMark;
@@ -96,7 +100,7 @@ namespace EncryptMessanger.dll.Encription
             byte[] encryptedIV = rsaToEncrypt.Encrypt(IV, true);
             //объединяем вектор и ключ в один массив
             byte[] encryptedAesParams = encryptedIV.Concat(encryptedAesKey).ToArray();
-
+            byte[] rsaVerifyBytes = Encoding.UTF8.GetBytes(session.RsaToVerify.ToXmlString(false));
             long dialogIdFromFile;
             byte[] dialogIdBytes = new byte[8];
 
@@ -111,14 +115,16 @@ namespace EncryptMessanger.dll.Encription
                 //если наткнулись на запись с нужным dialogId перезаписываем aes параметры
                 if(dialogIdFromFile == session.Dialog)
                 {                    
-                    stream.Write(encryptedAesParams, 0, encryptedAesParams.Length);
+                    stream.Write(encryptedAesParams, 0, encryptedAesParams.Length);                    
+                    stream.Write(rsaVerifyBytes, 0, rsaVerifyBytes.Length);
                     stream.Close();
                     return;
                 }
             }
             //если записи с таким dialogId не найдены добавляем новую запись
             byte[] bytesToWrite = BitConverter.GetBytes(session.Dialog).Concat(encryptedAesParams).ToArray();
-            stream.Write(bytesToWrite, 0, bytesToWrite.Length);
+            stream.Write(bytesToWrite, 0, bytesToWrite.Length);            
+            stream.Write(rsaVerifyBytes, 0, rsaVerifyBytes.Length);
             stream.Close();
 
         }

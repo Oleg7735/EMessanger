@@ -11,6 +11,7 @@ namespace EncryptMessangerClient
         private string _message;
         private long _from;
         private long _dialogId;
+        private DateTime _sendDate;
         public string Message
         {
             get { return _message; }
@@ -38,12 +39,26 @@ namespace EncryptMessangerClient
             }
         }
 
-        public NewMessageEventArgs(string message, long dialogId, long from, bool isAltered)
+        public DateTime SendDate
+        {
+            get
+            {
+                return _sendDate;
+            }
+
+            set
+            {
+                _sendDate = value;
+            }
+        }
+
+        public NewMessageEventArgs(string message, long dialogId, long from, DateTime sendDate, bool isAltered)
         {
             _message = message;
             _from = from;
             _isAltered = isAltered;
             _dialogId = dialogId;
+            SendDate = sendDate;
         }
 
     }

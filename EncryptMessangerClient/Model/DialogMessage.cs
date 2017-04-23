@@ -14,6 +14,7 @@ namespace EncryptMessangerClient.Model
         private UserInfo _author;
         private string _text;
         private bool _isAltered;
+        private DateTime _sendDate;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -69,17 +70,33 @@ namespace EncryptMessangerClient.Model
                 return "";
             }
         }
-        public DialogMessage(UserInfo author, string text, bool isAltered)
+
+        public DateTime SendDate
+        {
+            get
+            {
+                return _sendDate;
+            }
+
+            set
+            {
+                _sendDate = value;
+            }
+        }
+
+        public DialogMessage(UserInfo author, string text, DateTime sendDate, bool isAltered)
         {
             _isAltered = isAltered;
             _text = text;
             _author = author;
+            _sendDate = sendDate;
         }
-        public DialogMessage( string text, bool isAltered)
-        {
-            _isAltered = isAltered;
-            _text = text;            
-        }
+        //public DialogMessage( string text, bool isAltered, DateTime sendDate)
+        //{
+        //    _isAltered = isAltered;
+        //    _text = text;
+        //    SendDate = sendDate;         
+        //}
 
         public bool Equals(DialogMessage other)
         {

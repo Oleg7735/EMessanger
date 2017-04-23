@@ -12,6 +12,7 @@ namespace EncryptMessanger.dll.Encription
         private const int _aesIvSize = 16;
         private const int _aesEncrKeySize = 128;
         private const int _aesEncrIVSize = 128;
+        private const int _rsaVerifyKeyXmlSize = 243;
         private const string _rsaEncryptionKeyMark = "Encryption";
         private const string _rsaSignKeyMark = "Sign";
         private const string _rsaVerifyKeyMark = "Verify";
@@ -69,6 +70,14 @@ namespace EncryptMessanger.dll.Encription
             get
             {
                 return _rsaVerifyKeyMark;
+            }
+        }
+
+        public static int RsaVerifyKeyXmlSize
+        {
+            get
+            {
+                return _rsaVerifyKeyXmlSize;
             }
         }
     }

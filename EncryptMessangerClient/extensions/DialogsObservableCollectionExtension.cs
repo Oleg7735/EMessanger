@@ -11,16 +11,15 @@ namespace EncryptMessangerClient.extensions
 {
     static class DialogsObservableCollectionExtension
     {
-        public static void AddFromDialogInfo(this ObservableCollection<Dialog> dialogs, DialogSendibleInfo info)
-        {
-            Dialog dialog = new Dialog(info.DialogName, info.DialogId, info.EncryptMessages, info.SignMessages, info.MembersId);
-
-
-            if(!dialogs.Contains(dialog))
-            {
-                dialogs.Add(dialog);
-            }
-        }
+        //public static void AddFromDialogInfo(this ObservableCollection<Dialog> dialogs, DialogSendibleInfo info)
+        //{
+        //    Dialog dialog = new Dialog(info.DialogName, info.DialogId, info.EncryptMessages, info.SignMessages, info.MembersId);
+            
+        //    if(!dialogs.Contains(dialog))
+        //    {
+        //        dialogs.Add(dialog);
+        //    }
+        //}
         public static Dialog GetById(this ObservableCollection<Dialog> dialogs, long dialogId)
         {
             foreach(Dialog dialog in dialogs)

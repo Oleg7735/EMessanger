@@ -14,8 +14,8 @@ namespace EncryptMessanger.dll.Messages
         {
             _type = MessageType.DialogsRequestMessage;
             //AddAtribute(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
-            AddAtribute(new MessageAtribute(Atribute.DialogsCount, BitConverter.GetBytes(dialogsCount)));
-            AddAtribute(new MessageAtribute(Atribute.DialogOffset, BitConverter.GetBytes(dialogOffset)));
+            AddAtribute(new MessageAtribute(Atribute.Count, BitConverter.GetBytes(dialogsCount)));
+            AddAtribute(new MessageAtribute(Atribute.Offset, BitConverter.GetBytes(dialogOffset)));
 
         }
         public DialogsRequestMessage()
@@ -30,24 +30,24 @@ namespace EncryptMessanger.dll.Messages
         //}
         public void SetDialogsCount(int count)
         {
-            SetAtributeValue(new MessageAtribute(Atribute.DialogsCount, BitConverter.GetBytes(count)));
+            SetAtributeValue(new MessageAtribute(Atribute.Count, BitConverter.GetBytes(count)));
         }
         public void SetDialogsOffset(int offset)
         {
-            SetAtributeValue(new MessageAtribute(Atribute.DialogOffset, BitConverter.GetBytes(offset)));
+            SetAtributeValue(new MessageAtribute(Atribute.Offset, BitConverter.GetBytes(offset)));
         }
         public int Offset
         {
             get
             {
-                return BitConverter.ToInt32( GetAttribute(Atribute.DialogOffset), 0);
+                return BitConverter.ToInt32( GetAttribute(Atribute.Offset), 0);
             }
         }
         public int Count
         {
             get
             {
-                return BitConverter.ToInt32(GetAttribute(Atribute.DialogsCount), 0);
+                return BitConverter.ToInt32(GetAttribute(Atribute.Count), 0);
             }
         }
     }

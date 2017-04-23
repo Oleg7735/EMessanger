@@ -39,6 +39,11 @@ namespace EncryptMessanger.dll.Messages
             set { SetAtributeValue(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(value))); }
             get { return Encoding.UTF8.GetString(GetAttribute(Atribute.Text)); }
         }
+        public DateTime SendDate
+        {
+            set { SetAtributeValue(new MessageAtribute(Atribute.DateTime, BitConverter.GetBytes(value.ToBinary()))); }
+            get { return DateTime.FromBinary(BitConverter.ToInt64(GetAttribute(Atribute.DateTime), 0)); }
+        }
         private void init()
         {
             _type = MessageType.TextMessage;

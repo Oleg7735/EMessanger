@@ -43,6 +43,7 @@ namespace EncryptMessangerClient
             _client.DilogsReceived += OnDialogsRecponce;
             _client.AuthSuccess += OnClientAuthSuccess;
             _client.UserInfoReceived += OnUserInfoResponce;
+            _client.MessagesInfoReceived += OnDialogMessagesReceived;
             MainWindow mainWindow = new MainWindow();
             MainViewModel vm = mainWindow.DataContext as MainViewModel;
             vm.MessageSend += SendMessage;
@@ -54,8 +55,12 @@ namespace EncryptMessangerClient
             vm.DialogsRequest += OnDialogsRequest;
             vm.LoadDialogUserInfo += OnUserInfoRequest;
             vm.UpdateDialogKeys += OnUpdateDialogEncryptionKeys;
+            vm.LoadDialogSession += OnLoadDialogSession;
+            vm.LoadDialogMessages += OnLoadDialogMessages;
             mainWindow.Closed += MainWindow_Closed;
-           
+
+            _client.DialogSessionFaild += vm.OnDialogSessionFaild;
+            _client.DialogSessionSuccess += vm.OnDialogSessionSuccess;
             //mainWindow.Closed += vm.ClientStopCommand;
             this.MainWindow = mainWindow;
             //mainWindow.Show();
@@ -98,7 +103,7 @@ namespace EncryptMessangerClient
                     //vm.MessageBox = e.Message;
 
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
-                    vm.AddMessage(e.Interlocutor, e.DialogId, e.Message, e.IsAltered);
+                    vm.AddMessage(e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered);
                 });
             }
         }
@@ -333,7 +338,7 @@ namespace EncryptMessangerClient
                     {
                         foreach (DialogSendibleInfo d in args.Dialogs)
                         {
-                            vm.Dialogs.AddFromDialogInfo(d);
+                            vm.AddDialog(new Dialog(d.DialogName, d.DialogId, d.EncryptMessages, d.SignMessages, d.MembersId));
                         }
                     });
                 }
@@ -362,6 +367,23 @@ namespace EncryptMessangerClient
                     vm.AddContact(new UserInfo(args.UserId, args.Login));
                 });
             }
+        }
+        private void OnLoadDialogSession(object sender, LoadDialogSessionEventArgs args)
+        {
+            _client.LoadSession(args.DialogId);
+        }
+        private void OnLoadDialogMessages(object sender, LoadDialogMessagesEventArgs args)
+        {
+            _client.RequestDialogMessages(args.DialogId, args.Count, args.Offset);
+        }
+        private void OnDialogMessagesReceived(object sender, MessagesReceivedEventArgs args)
+        {
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+                vm.AddMessages(args.GetDialogMessages(), args.Dialog);
+            });
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {
