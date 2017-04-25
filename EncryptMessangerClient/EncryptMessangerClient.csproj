@@ -75,6 +75,7 @@
     <Compile Include="AuthWindow.xaml.cs">
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="EncryptedSessionManager.cs" />
     <Compile Include="EncryptionSettings.xaml.cs">
       <DependentUpon>EncryptionSettings.xaml</DependentUpon>
     </Compile>

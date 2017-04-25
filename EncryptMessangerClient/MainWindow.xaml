@@ -37,10 +37,12 @@
                                     <RowDefinition></RowDefinition>
                                     <RowDefinition></RowDefinition>
                                     <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <Label Content="{Binding Author}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"></Label>
                                 <Label Content="{Binding Text}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1"></Label>
-                                <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2" Foreground="Red"></Label>
+                                <Label Content="{Binding SendDate}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="2"></Label>
+                                <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Foreground="Red"></Label>
 
                             </Grid>
                         </Border>

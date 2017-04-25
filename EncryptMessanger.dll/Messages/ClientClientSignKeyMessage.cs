@@ -23,5 +23,12 @@ namespace EncryptMessanger.dll.Messages
         {
             _type = MessageType.ClientClientSignKeyMessage;
         }
+        //public long From
+        //{
+        //    get
+        //    {
+        //        return BitConverter.ToInt64(GetAttribute(Atribute.From), 0);
+        //    }
+        //}
     }
 }

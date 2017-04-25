@@ -117,11 +117,18 @@ namespace EncryptMessanger.dll.Encription
             {
                 throw new Exception("Protocol error. Sign key do not resived");
             }
-            decryptRsaForSign.FromXmlString(((ClientClientSignKeyMessage)message).RsaKey);
+            ClientClientSignKeyMessage signMessage = (ClientClientSignKeyMessage)message;
+            decryptRsaForSign.FromXmlString(signMessage.RsaKey);
 
+            List<UserVerificationData> verificationData = new List<UserVerificationData>();
+            verificationData.Add(new UserVerificationData(signMessage.From, decryptRsaForSign));
+            RSACryptoServiceProvider currentUserVerificationRsa = new RSACryptoServiceProvider();
+            currentUserVerificationRsa.PersistKeyInCsp = false;
+            currentUserVerificationRsa.ImportParameters(encryptRsaForSign.ExportParameters(false));
+            verificationData.Add(new UserVerificationData(senderId, currentUserVerificationRsa));
             //ICryptoTransform encrptTransform = aes.CreateEncryptor();
             //ICryptoTransform decryptTransform = aes.CreateDecryptor();
-            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, decryptRsaForSign);
+            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, verificationData);
         }
         public ClientClientEncryptedSession ClientClientResiverEncrypt(MessageWriter messageWriter, MessageReader reader, long currentUserId, ClientAKeyMessage aKeyMessage)
         {
@@ -159,13 +166,21 @@ namespace EncryptMessanger.dll.Encription
             {
                 throw new Exception("Protocol error. Sign key do not resived");
             }
-            decryptRsaForSign.FromXmlString(((ClientClientSignKeyMessage)message).RsaKey);
-            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), dialogId, currentUserId));
-            
+            ClientClientSignKeyMessage signMessage = (ClientClientSignKeyMessage)message;
+            decryptRsaForSign.FromXmlString((signMessage).RsaKey);
 
+            messageWriter.WriteMessage(new ClientClientSignKeyMessage(encryptRsaForSign.ToXmlString(false), dialogId, currentUserId));
+
+            List<UserVerificationData> verificationData = new List<UserVerificationData>();
+            verificationData.Add(new UserVerificationData(signMessage.From, decryptRsaForSign));
+
+            RSACryptoServiceProvider currentUserVerificationRsa = new RSACryptoServiceProvider();
+            currentUserVerificationRsa.PersistKeyInCsp = false;
+            currentUserVerificationRsa.ImportParameters(encryptRsaForSign.ExportParameters(false));
+            verificationData.Add(new UserVerificationData(currentUserId, currentUserVerificationRsa));
             //ICryptoTransform encrptTransform = aes.CreateEncryptor();
             //ICryptoTransform decryptTransform = aes.CreateDecryptor();
-            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, decryptRsaForSign );
+            return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, verificationData);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.IO;
 using EncryptMessanger.dll.Messages;
+using System.Diagnostics;
 
 namespace EncryptMessanger.dll.Encription
 {
@@ -25,7 +26,8 @@ namespace EncryptMessanger.dll.Encription
         AesManaged _aes;
 
         RSACryptoServiceProvider _rsaToSign;
-        RSACryptoServiceProvider _rsaToVerify;
+        //RSACryptoServiceProvider _rsaToVerify;
+        List<UserVerificationData> _verificationData;
 
         long _dialogId;
         public long Dialog
@@ -33,9 +35,12 @@ namespace EncryptMessanger.dll.Encription
             get { return _dialogId; }
         }
 
-        
+        private RSACryptoServiceProvider GetVerificationRsa(long authorId)
+        {
+            return _verificationData.Find(x => x.UserID == authorId).RsaToVerify;
+        }
 
-        public ClientClientEncryptedSession(AesManaged aes, long dialogId, RSACryptoServiceProvider rsaToSign, RSACryptoServiceProvider rsaToVerify)
+        public ClientClientEncryptedSession(AesManaged aes, long dialogId, RSACryptoServiceProvider rsaToSign, List<UserVerificationData> verificationData)
         {
             _dialogId = dialogId;
             //_encryptor = encryptor;
@@ -45,7 +50,7 @@ namespace EncryptMessanger.dll.Encription
             _aes = aes;
 
             _rsaToSign = rsaToSign;
-            _rsaToVerify = rsaToVerify;
+            _verificationData = verificationData;
             UseEncryption = true;
             UseSignature = true;
         }
@@ -69,13 +74,21 @@ namespace EncryptMessanger.dll.Encription
         }
         public byte[] CreateSign(byte[] data)
         {
+            
             return _rsaToSign.SignData(data, md5);
         }
-        public bool VerifyData(byte[] data, byte[] signature)
+        /// <summary>
+        /// Проверяет ЭЦП для данного сообщения
+        /// </summary>
+        /// <param name="data">Байты текта сообщения</param>
+        /// <param name="signature">ЭЦП, прикрепленная к сообщению</param>
+        /// <param name="authorInfo">Идентификатор автора сообщения(чтобы знать чей ключ использовать для расшифровки подписи)</param>
+        /// <returns></returns>
+        public bool VerifyData(byte[] data, byte[] signature, long authorId)
         {
             if (UseSignature)
-            {
-                return _rsaToVerify.VerifyData(data, md5, signature);
+            {                
+                return GetVerificationRsa(authorId).VerifyData(data, md5, signature.Take(128).ToArray());
             }
             return true;
         }
@@ -91,16 +104,24 @@ namespace EncryptMessanger.dll.Encription
             //fWriter.Write(_aes.IV);
             //fWriter.Write(_aes.Key.Length);
             //fWriter.Write(_aes.Key);
-            byte[] RsaToVerify = Encoding.UTF8.GetBytes(_rsaToVerify.ToXmlString(false));
-            byte[] LenRsaToVerify = new byte[4];
-            LenRsaToVerify = BitConverter.GetBytes(RsaToVerify.Length);
+            byte[] verificationDataCount = BitConverter.GetBytes(_verificationData.Count);
+            fs.Write(verificationDataCount, 0, verificationDataCount.Length);
+            foreach (UserVerificationData verificationDada in _verificationData)
+            {
+                byte[] RsaToVerify = Encoding.UTF8.GetBytes(verificationDada.RsaToVerify.ToXmlString(false));
+                byte[] LenRsaToVerify = new byte[4];
+                LenRsaToVerify = BitConverter.GetBytes(RsaToVerify.Length);
 
-            byte[] RsaToSign = Encoding.UTF8.GetBytes(_rsaToVerify.ToXmlString(false));
+                fs.Write(LenRsaToVerify, 0, LenRsaToVerify.Length);
+                fs.Write(RsaToVerify, 0, RsaToVerify.Length);
+                              
+            }
+
+            byte[] RsaToSign = Encoding.UTF8.GetBytes(_rsaToSign.ToXmlString(true));
             byte[] LenRsaToSign = new byte[4];
             LenRsaToSign = BitConverter.GetBytes(RsaToSign.Length);
 
-            fs.Write(RsaToVerify, 0, 4);
-            fs.Write(LenRsaToVerify, 0, LenRsaToVerify.Length);
+
             fs.Write(LenRsaToSign, 0, 4);
             fs.Write(RsaToSign, 0, RsaToSign.Length);
 
@@ -145,11 +166,11 @@ namespace EncryptMessanger.dll.Encription
             
         }
 
-        public RSACryptoServiceProvider RsaToVerify
+        public UserVerificationData[] VerificationData
         {
             get
             {
-                return _rsaToVerify;
+                return _verificationData.ToArray();
             }
         }
     }

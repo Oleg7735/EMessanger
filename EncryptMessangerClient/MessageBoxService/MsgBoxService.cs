@@ -17,7 +17,7 @@ namespace EncryptMessangerClient.MessageBoxService
         public bool ShowQuestion(string message)
         {
             MessageBoxResult result = MessageBox.Show(message, "Are you sure?", MessageBoxButton.YesNo);
-            return result.HasFlag(MessageBoxResult.OK);
+            return result.HasFlag(MessageBoxResult.Yes);
         }
     }
 }

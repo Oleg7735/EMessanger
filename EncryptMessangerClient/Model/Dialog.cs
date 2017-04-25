@@ -155,6 +155,9 @@ namespace EncryptMessangerClient.Model
         {
             SessionErrorMessage = "";
         }
-
+        public void SortMessages()
+        {
+            _dialogMessages = new ObservableCollection<DialogMessage>(DialogMessages.OrderBy(m => m.SendDate));
+        }
     }
 }

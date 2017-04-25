@@ -67,6 +67,7 @@
     <Compile Include="Encription\EncriptionParams.cs" />
     <Compile Include="Encription\EncryptionProvider.cs" />
     <Compile Include="Encription\SessionIO.cs" />
+    <Compile Include="Encription\UserVerificationData.cs" />
     <Compile Include="MessageAtribute.cs" />
     <Compile Include="MessageReader.cs" />
     <Compile Include="Messages\AKeyMessage.cs" />

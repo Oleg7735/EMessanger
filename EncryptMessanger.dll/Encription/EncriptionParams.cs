@@ -80,5 +80,13 @@ namespace EncryptMessanger.dll.Encription
                 return _rsaVerifyKeyXmlSize;
             }
         }
+        public static string GetRsaToEncryptAesKeyContainerName(long dialogId, long userId)
+        {
+            return dialogId.ToString() + EncriptionParams.RsaEncryptionKeyMark + userId.ToString();
+        }
+        public static string GetSignKeyContainerName(long dialogId, long userId)
+        {
+            return dialogId.ToString() + EncriptionParams.RsaSignKeyMark + userId.ToString();
+        }
     }
 }

@@ -128,11 +128,18 @@ namespace EncryptMessangerClient.ViewModel
                 message.AuthorInfo = authorInfo;
                 containerDialog.DialogMessages.Add(message);
             }
-            containerDialog.DialogMessages.OrderByDescending(m => m.SendDate);
+            containerDialog.SortMessages();
+            OnPropertyChanged("Messages");
         }
         public void AddMessage(long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
         {
             //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
+            //выводим принятые сообщения только для выделенного диалога, для остальных все равно подгрузка при выделении
+            if(dialog != CurrentDialog.DialogId)
+            {
+
+                return;
+            }
             UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
             try
             {
