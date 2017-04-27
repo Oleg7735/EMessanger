@@ -17,6 +17,7 @@ namespace EncryptMessangerClient.Model
         private bool _encrypt = true;
         private string _dialogName;
         private string _sessionErrorMessage;
+        private bool _sessionError;
         //public bool _showError = false;
         private ObservableCollection<DialogMessage> _dialogMessages = new ObservableCollection<DialogMessage>();
         public ObservableCollection<DialogMessage> DialogMessages
@@ -147,13 +148,30 @@ namespace EncryptMessangerClient.Model
                 }
             }
         }
+
+        public bool SessionError
+        {
+            get
+            {
+                return _sessionError;
+            }
+
+            set
+            {
+                _sessionError = value;                
+                OnPropertyChanged();
+            }
+        }
+
         public void AddSessionErrorMessage(string error)
         {
             SessionErrorMessage = error;
+            SessionError = true;
         }
         public void ClearDialogSessionError()
         {
             SessionErrorMessage = "";
+            SessionError = false;
         }
         public void SortMessages()
         {

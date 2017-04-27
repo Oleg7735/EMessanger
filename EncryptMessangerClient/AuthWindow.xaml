@@ -6,41 +6,67 @@
         xmlns:vm="clr-namespace:EncryptMessangerClient.ViewModel"
         xmlns:local="clr-namespace:EncryptMessangerClient"
         mc:Ignorable="d"
-        Title="AuthWindow" Height="315" Width="292">
+        Title="AuthWindow" Height="290" Width="292">
     <Window.DataContext>
         <vm:LogInViewModel />
     </Window.DataContext>
-
-    <Grid Margin="0,0,0,-20">
+    <Window.Resources>
+        <Style x:Key="text" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border CornerRadius="2" Background="White" Padding="2" BorderThickness="1" BorderBrush="#009ACD">
+                            <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter> 
+        </Style>
+        <Style x:Key="password" TargetType="PasswordBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border CornerRadius="2" Background="White" Padding="2" BorderThickness="1" BorderBrush="#009ACD">
+                            <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="0,0,0,-1" Background="AliceBlue">
         <Grid.ColumnDefinitions>
             <ColumnDefinition>
 
             </ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.7*"></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition Height="0.7*"></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition ></RowDefinition>
-            <RowDefinition ></RowDefinition>
-            <RowDefinition ></RowDefinition>
-            <RowDefinition Height="0.5*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            
         </Grid.RowDefinitions>
         <Label x:Name="Login" Content="Логин" HorizontalAlignment="Left" Margin="30,5,0,0" VerticalAlignment="Top" Grid.Row="0"/>
-        <TextBox x:Name="loginText" HorizontalAlignment="Stretch" Height="23" Margin="30,10,40,0" TextWrapping="Wrap" Text="{Binding Login}" VerticalAlignment="Top" Grid.Row="1" />
+
+        <TextBox x:Name="loginText" Style="{StaticResource  text}" HorizontalAlignment="Stretch"  Margin="30,10,30,0" TextWrapping="Wrap" Text="{Binding Login}" VerticalAlignment="Top"  Grid.Row="1">
+        
+        </TextBox>
         <Label x:Name="Password" Content="Пароль" HorizontalAlignment="Left" Margin="30,5,0,0" VerticalAlignment="Top" Grid.Row="2"/>
-        <PasswordBox x:Name="passwordBox" HorizontalAlignment="Stretch"  Margin="30,10,30,0" Grid.Row="3"   VerticalAlignment="Top" PasswordChanged="passwordBox_PasswordChanged" />
+        <PasswordBox Style="{StaticResource password}"  x:Name="passwordBox" Background="AliceBlue" HorizontalAlignment="Stretch"  Margin="30,10,30,0" Grid.Row="3"   VerticalAlignment="Top" PasswordChanged="passwordBox_PasswordChanged" />
         <Grid x:Name="ButtonsContainer"  Grid.Row="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <Button x:Name="sendButton" Content="Отправить" HorizontalAlignment="Stretch" Margin="30,10,10,10" Grid.Column="0" VerticalAlignment="Stretch" Width="Auto" Command="{Binding ClientAuthCommand}"/>
-            <Button x:Name="exitButton" Content="Выйти" HorizontalAlignment="Stretch" Margin="10,10,30,10" Grid.Column="1" VerticalAlignment="Stretch" Width="Auto" Command="{Binding ClientCloseCommand}"/>
+            <Button x:Name="sendButton" Background="#CAE1FF" Content="Отправить" HorizontalAlignment="Stretch" Margin="30,10,10,10" Grid.Column="0" VerticalAlignment="Stretch" Width="Auto" Command="{Binding ClientAuthCommand}"/>
+            <Button x:Name="exitButton" Background="#CAE1FF" Content="Выйти" HorizontalAlignment="Stretch" Margin="10,10,30,10" Grid.Column="1" VerticalAlignment="Stretch" Width="Auto" Command="{Binding ClientCloseCommand}"/>
 
         </Grid>
         <Label x:Name="erorLabel"  Content="{Binding AuthError}" HorizontalAlignment="Stretch" Margin="30,10,30,5" Grid.Row="4" VerticalAlignment="Top" Foreground="Red"/>
-        <Button x:Name="registrationButton" Command="{Binding ClientRegistrateCommand}" Background="LightYellow" Content="Регистрация" Grid.Row="6" Margin='30,10,30,10'></Button>
+        <Button x:Name="registrationButton" Command="{Binding ClientRegistrateCommand}" Background="#CAE1FF" Content="Регистрация" Grid.Row="6" Margin='30,10,30,10'></Button>
     </Grid>
 </Window>

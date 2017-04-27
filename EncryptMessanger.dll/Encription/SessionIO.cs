@@ -24,7 +24,7 @@ namespace EncryptMessanger.dll.Encription
                 rsaToDecryptKey = new RSACryptoServiceProvider(cspEncrypt);
 
                 CspParameters cspSign = new CspParameters();
-                cspSign.KeyContainerName = EncriptionParams.GetSignKeyContainerName(dialogID, ownerId); ;
+                cspSign.KeyContainerName = EncriptionParams.GetSignKeyContainerName(dialogID, ownerId);
                 rsaToSign = new RSACryptoServiceProvider(cspSign);
 
                 //CspParameters cspVerify = new CspParameters();

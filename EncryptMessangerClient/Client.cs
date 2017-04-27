@@ -25,6 +25,8 @@ namespace EncryptMessangerClient
         private string _sessionSaveFile = AppDomain.CurrentDomain.BaseDirectory + "\\encryptionParams.ekf";
         private string _serverIP;// = "192.168.0.100";
         private int _serverPort = 11000;
+        //private const string _clientClientEncryptionIP = ;// = "192.168.0.100";
+        private int _clientClientEncryptionPort = 11002;
         private TcpClient _client = new TcpClient();
         private MessageWriter _messageWriter;
         private MessageReader _messageReder;
@@ -114,28 +116,14 @@ namespace EncryptMessangerClient
                         case MessageType.CreateCryptoSessionRequest:
                             {
                                 CreateCryptoSessionRequest request = newMessage as CreateCryptoSessionRequest;
-                                _messageWriter.WriteMessage(new CreateCryptoSessionResponse(request.Dialog, request.From, _currentUserId, true));
+
+                                CreateSessionAsReceiver(request);
                                 break;
                             }
                         case MessageType.CreateCryptoSessionResponse:
                             {
                                 CreateCryptoSessionResponse response = newMessage as CreateCryptoSessionResponse;
-                                if (response.Response)
-                                {
-                                    EncryptionProvider enc = new EncryptionProvider();
-                                    try
-                                    {
-                                        ClientClientEncryptedSession newSession = enc.ClientClientSenderEncrypt(_messageWriter, _messageReder, response.Dialog, _currentUserId);
-                                        SessionAddOrReplase(newSession);
-                                        DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(response.Dialog));
-                                    }
-                                    catch(Exception ex)
-                                    {
-                                        DialogSessionFaild?.Invoke(this, new DialogSessionFaildEventArgs(response.Dialog, "Не удалось обновить ключи шифрования"));
-                                    }
-                                    
-                                }
-                                ReleaseClient();
+                                CreateSessionAsSender(response);
                                 break;
                             }
 
@@ -158,18 +146,7 @@ namespace EncryptMessangerClient
                         case MessageType.ClientPublicKeyMessage:
                             {
                                 ClientAKeyMessage keyMessage = newMessage as ClientAKeyMessage;
-                                try
-                                { 
-                                    EncryptionProvider enc = new EncryptionProvider();
-                                    ClientClientEncryptedSession newSession = enc.ClientClientResiverEncrypt(_messageWriter, _messageReder, _currentUserId, keyMessage);
-                                    SessionAddOrReplase(newSession);
-                                    DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(keyMessage.Dialog));
-                                    
-                                }
-                                catch(Exception ex)
-                                {
-                                    DialogSessionFaild?.Invoke(this, new DialogSessionFaildEventArgs(keyMessage.Dialog, "Не удалось обновить ключи шифрования"));
-                                }
+                                
                                 break;
                             }
                         case MessageType.TextMessage:
@@ -179,6 +156,7 @@ namespace EncryptMessangerClient
                                 if (session == null)
                                 {
                                     throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
+                                    
                                 }
                                 OnResiveMessages(Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
                                 //Debug.WriteLine("Send message signature: "+Encoding.UTF8.GetString(newTextMessage.GetSignature()));
@@ -223,6 +201,10 @@ namespace EncryptMessangerClient
                                     long messagesDialogId = messagesInfo[0].DialogId;
                                     MessagesReceivedEventArgs args = new MessagesReceivedEventArgs(messagesDialogId);
                                     ClientClientEncryptedSession dialogSession = FindSession(messagesDialogId);
+                                    if (dialogSession == null)
+                                    {                                       
+                                        throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
+                                    }
                                     foreach (MessageSendibleInfo info in messagesInfo)
                                     {
                                         //Debug.WriteLine("Load message signature: " + Encoding.UTF8.GetString(info.Signature));
@@ -230,6 +212,7 @@ namespace EncryptMessangerClient
                                         args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
                                     }
                                     MessagesInfoReceived?.Invoke(this, args);
+                                    
                                 }
                                 break;
                             }
@@ -278,7 +261,7 @@ namespace EncryptMessangerClient
                     //блокировать отправку сообщений на время установления сессии(сообщения помещаютс в очередь _messageQueue)
                     LockClient();
                     _messageQueue.Enqueue(new TextMessage(_currentUserId, dialogId, message));
-                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(dialogId, _currentUserId));
+                    _messageWriter.WriteMessage(new CreateCryptoSessionRequest(dialogId, _currentUserId, GetClientIp().GetAddressBytes(), _clientClientEncryptionPort));
                     //WriteClientClientMesssage(new TextMessage(_currentUserLogin, to, message));
                     //_messageList.Add(new CreateCryptoSessionRequest(to, _currentUserLogin));
                     //EncryptionProvider enc = new EncryptionProvider();
@@ -319,6 +302,15 @@ namespace EncryptMessangerClient
 
             return ipv4Adreses[ipv4Adreses.Length - 1].ToString();
         }
+        private IPAddress GetClientIp()
+        {
+            String strHostName = Dns.GetHostName();
+            IPHostEntry iphostentry = Dns.GetHostEntry(strHostName);
+            IPAddress[] ipv4Adreses = iphostentry.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray();
+
+
+            return ipv4Adreses[ipv4Adreses.Length - 1];
+        }
         private void LockClient()
         {
             isLocked = true;
@@ -334,7 +326,41 @@ namespace EncryptMessangerClient
             }
 
         }
+        private async void CreateSessionAsSender(CreateCryptoSessionResponse response)
+        {
+            if (response.Response)
+            {
+                EncryptionProvider enc = new EncryptionProvider();
+                try
+                {
+                    ClientClientEncryptedSession newSession = await enc.ClientClientSenderEncryptAsync(new IPEndPoint(GetClientIp(), _clientClientEncryptionPort), response.Dialog, _currentUserId);
+                    SessionAddOrReplase(newSession);
+                    DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(response.Dialog));
+                }
+                catch (Exception ex)
+                {
+                    DialogSessionFaild?.Invoke(this, new DialogSessionFaildEventArgs(response.Dialog, "Не удалось обновить ключи шифрования"));
+                }
 
+            }
+            ReleaseClient();
+        }
+        private async void CreateSessionAsReceiver(CreateCryptoSessionRequest request)
+        {
+            _messageWriter.WriteMessage(new CreateCryptoSessionResponse(request.Dialog, request.From, _currentUserId, true));
+            try
+            {
+                EncryptionProvider enc = new EncryptionProvider();
+                ClientClientEncryptedSession newSession = await enc.ClientClientResiverEncryptAsync(new IPEndPoint(request.Ip, request.Port), _currentUserId);
+                SessionAddOrReplase(newSession);
+                DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(request.Dialog));
+
+            }
+            catch (Exception ex)
+            {
+                DialogSessionFaild?.Invoke(this, new DialogSessionFaildEventArgs(request.Dialog, "Не удалось обновить ключи шифрования"));
+            }
+        }
         //public void Prepare()
         //{
         //    _messageReder = new MessageReader(_client.GetStream());
@@ -379,7 +405,7 @@ namespace EncryptMessangerClient
 
         public void UpdateDialogEncryptionKeys(long dialogId, long userId)
         {
-            _messageWriter.WriteMessage( new CreateCryptoSessionRequest(dialogId, userId));
+            _messageWriter.WriteMessage( new CreateCryptoSessionRequest(dialogId, userId, GetClientIp().GetAddressBytes(), _clientClientEncryptionPort));
         }
         public void ChangeEncryptionSettings(long dialog, bool useSign, bool useEncrypt)
         {

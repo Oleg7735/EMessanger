@@ -18,7 +18,8 @@ public enum MessageType
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
-    UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime
+    UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime, IP,
+    Port
 };
 namespace EncryptMessanger.dll.Messages
 {

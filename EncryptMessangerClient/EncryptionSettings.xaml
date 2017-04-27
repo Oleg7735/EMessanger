@@ -10,7 +10,7 @@
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
-    <Grid Height="270" VerticalAlignment="Top">
+    <Grid Height="270" VerticalAlignment="Top" Background='AliceBlue'>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition></RowDefinition>

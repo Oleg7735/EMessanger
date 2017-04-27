@@ -83,7 +83,7 @@ namespace EncryptMessangerClient
             logvm.CloseClient += OnAuthExit;
             logvm.RegistrateClient += OpenRegstrationWindow;
 
-
+            
             _logInForm.Show();
 
         }

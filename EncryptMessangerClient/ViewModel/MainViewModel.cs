@@ -86,7 +86,14 @@ namespace EncryptMessangerClient.ViewModel
                                 _currentDialog.BindMessagesToAuthor(author);
                             }
                         }
-                        LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 20, 0));
+                        if (!_currentDialog.SessionError)
+                        {
+                            LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 20, 0));
+                        }
+                        else
+                        {
+                            _messageService.ShowNotification("Не удалось расшифровать сообщения для данного диалога. Ключи шифрования не найдены.");
+                        }
                     }
                     OnPropertyChanged();
                     OnPropertyChanged("Messages");
@@ -419,6 +426,7 @@ namespace EncryptMessangerClient.ViewModel
         }
         public void OnDialogSessionSuccess(object sender, DialogSessionSuccessEventArgs arg)
         {
+            _messageService.ShowNotification("Ключи шифрования успешно обновлены");
             Dialogs.GetById(arg.DialogId).ClearDialogSessionError();
         }
     }
