@@ -82,11 +82,15 @@
                     <RowDefinition Height="auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-            <TextBox x:Name="textBox"  HorizontalAlignment="Stretch"  Margin="5,5,5,5" Padding="10" TextWrapping="Wrap"  VerticalAlignment="Stretch"  Text="{Binding MessageBox,UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="0"/>
-            <Button  x:Uid="sendMessageButton" Content="Отправить" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch" Padding="7" Command="{Binding MessageSendCommand}" Grid.Row="0" Grid.Column="1"/>
+                <Button Margin="5" Grid.Column="0" MaxHeight="40" Background="White">
+                    <Image Source="C:\Users\home\Documents\Visual Studio 2015\Projects\EncryptMessangerClient\EncryptMessangerClient\bin\Debug\image1.png"></Image>
+                </Button>
+            <TextBox x:Name="textBox"  HorizontalAlignment="Stretch"  Margin="5,5,5,5" Padding="10" TextWrapping="Wrap"  VerticalAlignment="Stretch"  Text="{Binding MessageBox,UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1"/>
+            <Button  x:Uid="sendMessageButton" Content="Отправить" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch" Padding="7" Command="{Binding MessageSendCommand}" Grid.Row="0" Grid.Column="2"/>
 
             </Grid>
         </Grid>

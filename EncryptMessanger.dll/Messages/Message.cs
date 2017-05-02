@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessanger.dll.Messages.FileMessages;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,13 +14,13 @@ public enum MessageType
     ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
     DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
     DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage, 
-    DialogMessagesResponceMessage, DialogMessagesRequestMessage
+    DialogMessagesResponceMessage, DialogMessagesRequestMessage, FileFragmentMessage, EndFileMessage
 };
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
     UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime, IP,
-    Port
+    Port, BinaryData, Name
 };
 namespace EncryptMessanger.dll.Messages
 {
@@ -322,7 +323,17 @@ namespace EncryptMessanger.dll.Messages
                     {
                         message = new DialogMessagesResponceMessage();
                         break;
-                    }       
+                    }
+                case MessageType.FileFragmentMessage:
+                    {
+                        message = new FileFragmentMessage();
+                        break;
+                    }
+                case MessageType.EndFileMessage:
+                    {
+                        message = new EndFileMessage();
+                        break;
+                    }   
                 default:
                     {
                         throw new ArgumentException(String.Format("Не определено действие по созданию объекта сообщения для сообщения типа {0}", type.ToString()));

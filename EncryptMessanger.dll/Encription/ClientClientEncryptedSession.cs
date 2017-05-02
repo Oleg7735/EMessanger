@@ -58,19 +58,47 @@ namespace EncryptMessanger.dll.Encription
         {
             if (UseEncryption)
             {
-                byte[] decryptedData = _decryptor.TransformFinalBlock(data, 0, data.Length);
-                _decryptor = _aes.CreateDecryptor();
+                ICryptoTransform decryptor = _aes.CreateDecryptor();
+                byte[] decryptedData = decryptor.TransformFinalBlock(data, 0, data.Length);
+                
                 return decryptedData;
             }
             return data;
         }
+        /// <summary>
+        /// Метод, подготавливающий сессию к новому сеансу потокового шифроваия с помощью метода EncryptAsStream
+        /// Следует вызывать перед выше указанным методами.
+        /// </summary>
+        public void InitStreamEncryptor()
+        {            
+            _encryptor = _aes.CreateEncryptor();
+        }
+
+        /// <summary>
+        /// Метод, подготавливающий сессию к новому сеансу потокового дешифроваия с помощью метода DecryptAsStream
+        /// Следует вызывать перед выше указанным методами.
+        /// </summary>
+        public void InitStreamDecryptor()
+        {
+            _decryptor = _aes.CreateDecryptor();
+        }
+
         public byte[] Encrypt(byte[] data)
         {
             //byte[] startIV = _aes.IV;
-            byte[] encryptedData = _encryptor.TransformFinalBlock(data, 0, data.Length);
-            _encryptor = _aes.CreateEncryptor();
+            ICryptoTransform encryptor = _aes.CreateEncryptor();
+            byte[] encryptedData = encryptor.TransformFinalBlock(data, 0, data.Length);
+            
             //_aes.IV = startIV;
             return encryptedData;
+        }
+        public ICryptoTransform GetEncryptor()
+        {
+            return _aes.CreateEncryptor();
+        }
+        public ICryptoTransform GetDecryptor()
+        {
+            return _aes.CreateDecryptor();
         }
         public byte[] CreateSign(byte[] data)
         {
@@ -165,7 +193,54 @@ namespace EncryptMessanger.dll.Encription
             }
             
         }
+        public byte[] SignFile(Stream file)
+        {
+            return _rsaToSign.SignData(file, md5);
+        }
+        public bool VerifyFile(Stream file, long userId, byte[] signature)
+        {
+            RSACryptoServiceProvider rsa = GetVerificationRsa(userId);
+            MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+            byte[] hash = md5.ComputeHash(file);
+            return rsa.VerifyHash(hash, CryptoConfig.MapNameToOID("MD5") , signature);
+        }
+        public byte[] EncryptBytesAsStream(byte[] bytes)
+        {
+            byte[] res = new byte[bytes.Length];
+            //int transed = 0;
+            //for (int i = 0; i < 256; i += transed)
+            //{
+            //    transed = _encryptor.TransformBlock(bytes, i, 16, res, i);
+            //}            
+            _encryptor.TransformBlock(bytes, 0, bytes.Length, res, 0);
+            return res;
+            //return _encryptor.TransformFinalBlock(bytes,0,bytes.Length);
+            
+        }
+        public byte[] DecryptBytesAsStream(byte[] bytes)
+        {
+            byte[] res = new byte[bytes.Length];
+            //int transed = 0;
 
+            //int s = 0;
+            //for (int i = 0; i < 256; i += transed)
+            //{
+            //    transed = _decryptor.TransformBlock(bytes, i, 16, res, i);
+            //    s += 16;
+            //}
+            _decryptor.TransformBlock(bytes, 0, bytes.Length, res, 0);
+            //if (p < bytes.Length)
+            //{
+            //    _decryptor.TransformBlock(bytes, bytes.Length, bytes.Length - p, res, p);
+            //}
+            return res;
+            //return _decryptor.TransformFinalBlock(bytes, 0, bytes.Length); 
+        }
+
+        public ClientClientEncryptedSession GetCopy()
+        {
+            return new ClientClientEncryptedSession(_aes, Dialog, _rsaToSign, new List<UserVerificationData> (VerificationData));
+        }
         public UserVerificationData[] VerificationData
         {
             get

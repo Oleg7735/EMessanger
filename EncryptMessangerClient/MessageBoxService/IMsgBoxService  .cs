@@ -10,5 +10,7 @@ namespace EncryptMessangerClient.MessageBoxService
     {
         void ShowNotification(string message);
         bool ShowQuestion(string message);
+        string ShowSaveFileWindow(string message);
+        string ShowOpenFileWindow();
     }
 }

@@ -235,7 +235,8 @@ namespace EncryptMessanger.dll
         //    return _reader.IsStartElement();
         //}
         public void Close()
-        {           
+        {
+                       
             _stream.Close();
         }
 

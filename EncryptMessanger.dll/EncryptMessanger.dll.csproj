@@ -68,6 +68,8 @@
     <Compile Include="Encription\EncryptionProvider.cs" />
     <Compile Include="Encription\SessionIO.cs" />
     <Compile Include="Encription\UserVerificationData.cs" />
+    <Compile Include="FileTransfer\FileReceiver.cs" />
+    <Compile Include="FileTransfer\FileSender.cs" />
     <Compile Include="MessageAtribute.cs" />
     <Compile Include="MessageReader.cs" />
     <Compile Include="Messages\AKeyMessage.cs" />
@@ -88,6 +90,8 @@
     <Compile Include="Messages\DialogsRequestMessage.cs" />
     <Compile Include="Messages\DialogsResponceMessage.cs" />
     <Compile Include="Messages\EndStreamMessage.cs" />
+    <Compile Include="Messages\FileMessages\EndFileMessage.cs" />
+    <Compile Include="Messages\FileMessages\FileFragmentMessage.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ProcessedMessage.cs" />
     <Compile Include="Messages\RegistrationSuccessMessage.cs" />
@@ -110,6 +114,7 @@
     <Compile Include="SendibleData\ISendibleData.cs" />
     <Compile Include="SendibleData\MessageSendibleInfo.cs" />
     <Compile Include="Tests\DialogSendibleInfoTest.cs" />
+    <Compile Include="Tests\FileTransferTest.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />
     <Compile Include="Tests\MesssageSendibleDataTest.cs" />

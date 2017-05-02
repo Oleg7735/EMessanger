@@ -85,10 +85,10 @@ namespace EncryptMessanger.dll.Encription
         }
         public async Task<ClientClientEncryptedSession> ClientClientSenderEncryptAsync(IPEndPoint ipPoint, long dialogId, long senderId)
         {
-           
+            return await Task.Run(() => { 
                 TcpListener listener = new TcpListener(ipPoint);
                 listener.Start();
-                TcpClient sessionUpdateConnection = listener.AcceptTcpClient(); ;
+                TcpClient sessionUpdateConnection = listener.AcceptTcpClient();
                 listener.Stop();
                 MessageWriter messageWriter = new MessageWriter(sessionUpdateConnection.GetStream());
                 MessageReader reader = new MessageReader(sessionUpdateConnection.GetStream());
@@ -138,13 +138,13 @@ namespace EncryptMessanger.dll.Encription
                 //ICryptoTransform encrptTransform = aes.CreateEncryptor();
                 //ICryptoTransform decryptTransform = aes.CreateDecryptor();
                 return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, verificationData);
-            
+            });
         }
         public ClientClientEncryptedSession ClientClientSenderEncrypt(IPEndPoint ipPoint, long dialogId, long senderId)
         {
             TcpListener listener = new TcpListener(ipPoint);
             listener.Start();
-            TcpClient sessionUpdateConnection = listener.AcceptTcpClient(); ;
+            TcpClient sessionUpdateConnection = listener.AcceptTcpClient();
             listener.Stop();
             MessageWriter messageWriter = new MessageWriter(sessionUpdateConnection.GetStream());
             MessageReader reader = new MessageReader(sessionUpdateConnection.GetStream());
@@ -199,7 +199,7 @@ namespace EncryptMessanger.dll.Encription
 
         public async Task<ClientClientEncryptedSession> ClientClientResiverEncryptAsync(IPEndPoint ipPoint, long senderId)
         {
-            
+            return await Task.Run(() => { 
                 long currentUserId = senderId;
                 TcpClient sessionUpdateConnection = new TcpClient();
                 sessionUpdateConnection.Connect(ipPoint);
@@ -257,7 +257,7 @@ namespace EncryptMessanger.dll.Encription
                 //ICryptoTransform encrptTransform = aes.CreateEncryptor();
                 //ICryptoTransform decryptTransform = aes.CreateDecryptor();
                 return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, verificationData);
-            
+            });
         }
         public ClientClientEncryptedSession ClientClientResiverEncrypt(IPEndPoint ipPoint, long currentUserId )
         {
