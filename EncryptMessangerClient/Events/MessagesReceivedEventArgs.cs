@@ -92,6 +92,12 @@ namespace EncryptMessangerClient.Events
         {
             _messages.Add(new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered));
         }
+        public void AddMessage(long authorId, string text, DateTime sendTime, bool isAltered, long attachId)
+        {
+            DialogMessage message = new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered);
+            message.AddAttachment(attachId);
+            _messages.Add(message);
+        }
         internal DialogMessage[] GetDialogMessages()
         {
             return _messages.ToArray();

@@ -84,6 +84,7 @@
     <Compile Include="Messages\ClientSKeyMessage.cs" />
     <Compile Include="Messages\CreateCryptoSessionRequest.cs" />
     <Compile Include="Messages\CreateCryptoSessionResponse.cs" />
+    <Compile Include="Messages\DeleteMessagesRequestMessage.cs" />
     <Compile Include="Messages\DialogEncryptionSettingsMessage.cs" />
     <Compile Include="Messages\DialogMessagesRequestMessage.cs" />
     <Compile Include="Messages\DialogMessagesResponceMessage.cs" />
@@ -92,6 +93,8 @@
     <Compile Include="Messages\EndStreamMessage.cs" />
     <Compile Include="Messages\FileMessages\EndFileMessage.cs" />
     <Compile Include="Messages\FileMessages\FileFragmentMessage.cs" />
+    <Compile Include="Messages\FileMessages\RecceiveFileRequest.cs" />
+    <Compile Include="Messages\FileMessages\SendFileRequest.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ProcessedMessage.cs" />
     <Compile Include="Messages\RegistrationSuccessMessage.cs" />

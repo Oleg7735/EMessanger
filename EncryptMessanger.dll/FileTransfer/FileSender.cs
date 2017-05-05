@@ -14,20 +14,20 @@ using System.Threading;
 
 namespace EncryptMessanger.dll.FileTransfer
 {
-    class FileSender
+    public class FileSender
     {
         private int _dataDose = 256;
-        public async Task SendFileToServerAsync(string fileName, ClientClientEncryptedSession session, IPEndPoint point)
+        public async Task SendFileToServerAsync(string filePath, ClientClientEncryptedSession session, IPEndPoint point)
         {
             await Task.Run(() => {
-                SendFileToServer(fileName, session, point);
+                SendFileToServer(filePath, session, point);
             });
             
         }
-        public void SendFileToServer(string fileName, ClientClientEncryptedSession session, IPEndPoint point)
+        public void SendFileToServer(string filePath, ClientClientEncryptedSession session, IPEndPoint point)
         {
             ICryptoTransform encryptor = session.GetEncryptor();
-            FileInfo info = new FileInfo(fileName);
+            FileInfo info = new FileInfo(filePath);
             TcpListener listener = new TcpListener(point);
             listener.Start();
             TcpClient client = listener.AcceptTcpClient();
@@ -37,7 +37,7 @@ namespace EncryptMessanger.dll.FileTransfer
 
             byte[] dataBytes = new byte[_dataDose];
 
-            FileStream stream = new FileStream(fileName, FileMode.Open);
+            FileStream stream = new FileStream(filePath, FileMode.Open);
             byte[] signature = session.SignFile(stream);
             //byte[] nameBytes = session.Encrypt(Encoding.UTF8.GetBytes(info.Name));
             //byte[] realLength = BitConverter.GetBytes(info.Length);
@@ -63,11 +63,11 @@ namespace EncryptMessanger.dll.FileTransfer
             stream.Close();
             //writer.Close();
         }
-        public async Task SendFileToClientAsync(string fileName, IPEndPoint point, byte[] signature)
+        public async Task SendFileToClientAsync(string filePath, IPEndPoint point, byte[] signature)
         {
             await Task.Run(() =>
             {           
-            FileStream reader = new FileStream(fileName, FileMode.Open);
+            FileStream reader = new FileStream(filePath, FileMode.Open);
             TcpClient client = new TcpClient();
             client.Connect(point);
             MessageWriter writer = new MessageWriter(client.GetStream());

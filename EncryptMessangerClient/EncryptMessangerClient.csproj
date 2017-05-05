@@ -75,6 +75,7 @@
     <Compile Include="AuthWindow.xaml.cs">
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Commands\CommandWithParametr.cs" />
     <Compile Include="EncryptedSessionManager.cs" />
     <Compile Include="EncryptionSettings.xaml.cs">
       <DependentUpon>EncryptionSettings.xaml</DependentUpon>
@@ -100,11 +101,13 @@
     <Compile Include="Events\NewMessageEventArgs.cs" />
     <Compile Include="Events\RegistrationErrorEventArgs.cs" />
     <Compile Include="Events\RegistrationSuccessEventArgs.cs" />
+    <Compile Include="Events\SendFileEventArgs.cs" />
     <Compile Include="Events\UpdateDialogEncryptionKeysEventArgs.cs" />
     <Compile Include="extensions\DialogsObservableCollectionExtension.cs" />
     <Compile Include="extensions\MessagesSendibleInfoListExtension.cs" />
     <Compile Include="MessageBoxService\IMsgBoxService  .cs" />
     <Compile Include="MessageBoxService\MsgBoxService.cs" />
+    <Compile Include="Model\Attachment.cs" />
     <Compile Include="Model\Dialog.cs" />
     <Compile Include="Model\DialogMessage.cs" />
     <Compile Include="Model\RegistrationInfo.cs" />

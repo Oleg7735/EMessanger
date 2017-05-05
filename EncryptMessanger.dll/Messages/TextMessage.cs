@@ -46,6 +46,7 @@ namespace EncryptMessanger.dll.Messages
         }
         private void init()
         {
+            SetAtributeValue(new MessageAtribute(Atribute.HasAttach, BitConverter.GetBytes(false)));
             _type = MessageType.TextMessage;
             _tag = "message";
         }
@@ -86,6 +87,45 @@ namespace EncryptMessanger.dll.Messages
                 return new byte[2];
             }
             
+        }
+        public bool HasAttach
+        {
+            get
+            {
+                return BitConverter.ToBoolean(GetAttribute(Atribute.HasAttach), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.HasAttach, BitConverter.GetBytes(value)));
+            }
+        }
+        //public byte[] AttachName
+        //{
+        //    get
+        //    {
+        //        return GetAttribute(Atribute.AttachName);
+        //    }
+        //    set
+        //    {
+        //        SetAtributeValue(new MessageAtribute(Atribute.AttachName, value));
+        //    }
+        //}
+        public long AttachId
+        {
+            get
+            {
+                return BitConverter.ToInt64(GetAttribute(Atribute.AttachId), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.AttachId, BitConverter.GetBytes(value)));
+            }
+        }
+        public void AddAttach(long attachId)//, byte[] attachName)
+        {
+            AttachId = attachId;
+            //AttachName = attachName;
+            HasAttach = true;
         }
         public override string ToString()
         {

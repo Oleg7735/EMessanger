@@ -21,6 +21,7 @@ namespace EncryptMessangerClient.ViewModel
         private UserInfo _currentUser;
         private List<UserInfo> _contacts = new List<UserInfo>();
         private IMsgBoxService _messageService;
+        //private List<Attachment> _newMessageAttachments = new List<Attachment>();
         //private string _currentUserLogin;
 
         public string CurrentUserLogin
@@ -100,7 +101,8 @@ namespace EncryptMessangerClient.ViewModel
                     MessageSendCommand.RaiseCanExecuteChanged();
                     ExportKeysCommand.RaiseCanExecuteChanged();
                     EncryptSessionCommand.RaiseCanExecuteChanged();
-                    UpdateDialogEncryptionKeysCommand.RaiseCanExecuteChanged(); 
+                    UpdateDialogEncryptionKeysCommand.RaiseCanExecuteChanged();
+                    SendFileCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -141,10 +143,13 @@ namespace EncryptMessangerClient.ViewModel
         public void AddMessage(long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
         {
             //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
-            //выводим принятые сообщения только для выделенного диалога, для остальных все равно подгрузка при выделении
-            if(dialog != CurrentDialog.DialogId)
+            if(CurrentDialog == null)
             {
-
+                return;
+            }
+            //выводим принятые сообщения только для выделенного диалога, для остальных все равно подгрузка при выделении
+            if (dialog != CurrentDialog.DialogId)
+            {
                 return;
             }
             UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
@@ -203,6 +208,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<LoadDialogUserInfoEventArgs> LoadDialogUserInfo;
         public event EventHandler<LoadDialogMessagesEventArgs> LoadDialogMessages;
         public event EventHandler<LoadDialogSessionEventArgs> LoadDialogSession;
+        public event EventHandler<SendFileEventArgs> FileSend;
 
 
         public Command MessageSendCommand { get; private set; }
@@ -211,6 +217,8 @@ namespace EncryptMessangerClient.ViewModel
         public Command ExportKeysCommand { get; private set; }
         public Command EncryptSessionCommand { get; private set; }
         public Command UpdateDialogEncryptionKeysCommand { get; private set; }
+        public Command SendFileCommand { get; private set; }
+        public Command LoadFileCommand { get; private set; }
 
         public string MessageBox
         {
@@ -225,6 +233,44 @@ namespace EncryptMessangerClient.ViewModel
                 }
             }
         }
+
+        private void LoadFile(long attachId)
+        {
+            string fileName = _messageService.ShowSaveFileDialog("");
+        }
+        private bool CanLoadFile()
+        {
+            return true;
+        }
+        private void SendFile()
+        {
+            if (CurrentDialog != null)
+            {
+                Attachment newAttachment = _messageService.ShowAttachmentOpenDialog();
+                if (newAttachment == null)
+                {
+                    return;
+                }
+                FileSend?.Invoke(this, new SendFileEventArgs(newAttachment.Path, newAttachment.FileName, CurrentDialog.DialogId, CurrentUserId));
+                //DialogMessage newMessage = new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), newAttachment.FileName, DateTime.Now, false);
+                //newMessage.AddAttachment(newAttachment);
+                //CurrentDialog.DialogMessages.Add(newMessage);                
+            }            
+            //_newMessageAttachments.Add(newAttachment);
+
+        }
+        private bool CanSendFile()
+        {
+            return CurrentDialog != null;
+        }
+        //private void DeattachFile()
+        //{
+            
+        //}
+        //private bool CanDeattachFile()
+        //{
+        //    return _newMessageAttachments.Count != 0;
+        //}
         private bool CanSendMessage()
         {
             return CurrentDialog != null && MessageBox != "" && MessageBox!=null;
@@ -234,7 +280,7 @@ namespace EncryptMessangerClient.ViewModel
             if(CurrentDialog != null)
             {
                 MessageSend?.Invoke(this, new MessageSendEventArgs(_messageBox, CurrentDialog.DialogId));
-                CurrentDialog.DialogMessages.Add(new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), _messageBox, DateTime.Now, false));
+                //CurrentDialog.DialogMessages.Add(new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), _messageBox, DateTime.Now, false));
                 MessageBox = "";
                 
             }
@@ -299,7 +345,9 @@ namespace EncryptMessangerClient.ViewModel
             ExportKeysCommand = new Command(ExportKeys, CanExportKeys);
             EncryptSessionCommand = new Command(EditEncryptionSetting, CanEditEncryptionSetting);
             UpdateDialogEncryptionKeysCommand = new Command(UpdateDialogEncryptionKeys, CanUpdateDialogEncryptionKeys);
-
+            SendFileCommand = new Command(SendFile, CanSendFile);
+            //LoadFileCommand = new Command(LoadFile, CanLoadFile);
+            
             _currentUser = new UserInfo();
             
             //_dialogs.Add(new Model.Dialog("user3"));
@@ -412,6 +460,19 @@ namespace EncryptMessangerClient.ViewModel
             }
         }
 
+        //public List<Attachment> NewMessageAttachments
+        //{
+        //    get
+        //    {
+        //        return _newMessageAttachments;
+        //    }
+
+        //    set
+        //    {
+        //        _newMessageAttachments = value;
+        //    }
+        //}
+
         public void AddDialog(Dialog dialog)
         {
             if (!_dialogs.Contains(dialog))
@@ -428,6 +489,15 @@ namespace EncryptMessangerClient.ViewModel
         {
             _messageService.ShowNotification("Ключи шифрования успешно обновлены");
             Dialogs.GetById(arg.DialogId).ClearDialogSessionError();
+        }
+        public void DeleteDialogMessages(long dialogId)
+        {
+            Dialog dialog = _dialogs.Where(d => d.DialogId == dialogId).FirstOrDefault();
+            if(dialog != null)
+            {
+                dialog.DialogMessages.Clear();
+                OnPropertyChanged("Messages");
+            }
         }
     }
 }

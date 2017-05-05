@@ -8,7 +8,7 @@
         xmlns:m="clr-namespace:EncryptMessangerClient.Model"
         mc:Ignorable="d"
         x:Uid="mainWindow"
-        Title="EncryptedMessangerClient" Height="602" Width="865" 
+        Title="EncryptedMessangerClient" Height="570" Width="850" 
         >
 
 
@@ -67,11 +67,15 @@
                                     <RowDefinition Height="auto"></RowDefinition>
                                     <RowDefinition Height="auto"></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <Label Content="{Binding Author}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" Foreground="#1C1C1C" Grid.Row="0"></Label>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                    <ColumnDefinition Width="auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Label Content="{Binding Author}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontWeight="Bold" Foreground="#1C1C1C" Grid.Row="0" Grid.Column="0"></Label>
                                 <Label Content="{Binding Text}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Grid.Row="1"></Label>
-                                <Label Content="{Binding SendDate}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontStyle="Italic" Foreground="DarkGray" Grid.Row="2"></Label>
-                                <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Foreground="Red"></Label>
-
+                                <Label Content="{Binding SendDate}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontStyle="Italic" Foreground="DarkGray" Grid.Row="2" Grid.Column="0"></Label>
+                                <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Foreground="Red" Grid.Column="0"></Label>
+                                <Button Visibility="{Binding AttachButtonVisibility}" Content="Загрузить" CommandParameter="{Binding AttachId}" Grid.Column="1" Grid.Row="1"></Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -86,7 +90,7 @@
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <Button Margin="5" Grid.Column="0" MaxHeight="40" Background="White">
+                <Button Margin="5" Grid.Column="0" MaxHeight="40" Background="White" Command="{Binding SendFileCommand}">
                     <Image Source="C:\Users\home\Documents\Visual Studio 2015\Projects\EncryptMessangerClient\EncryptMessangerClient\bin\Debug\image1.png"></Image>
                 </Button>
             <TextBox x:Name="textBox"  HorizontalAlignment="Stretch"  Margin="5,5,5,5" Padding="10" TextWrapping="Wrap"  VerticalAlignment="Stretch"  Text="{Binding MessageBox,UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1"/>

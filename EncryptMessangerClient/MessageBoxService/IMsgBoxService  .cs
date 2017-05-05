@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessangerClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,8 @@ namespace EncryptMessangerClient.MessageBoxService
     {
         void ShowNotification(string message);
         bool ShowQuestion(string message);
-        string ShowSaveFileWindow(string message);
-        string ShowOpenFileWindow();
+        string ShowSaveFileDialog(string message);
+        string ShowOpenFileDialog();
+        Attachment ShowAttachmentOpenDialog();
     }
 }

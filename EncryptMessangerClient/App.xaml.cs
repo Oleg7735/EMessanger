@@ -59,10 +59,12 @@ namespace EncryptMessangerClient
             vm.UpdateDialogKeys += OnUpdateDialogEncryptionKeys;
             vm.LoadDialogSession += OnLoadDialogSession;
             vm.LoadDialogMessages += OnLoadDialogMessages;
+            vm.FileSend += OnSendFile;
             mainWindow.Closed += MainWindow_Closed;
 
             _client.DialogSessionFaild += vm.OnDialogSessionFaild;
             _client.DialogSessionSuccess += vm.OnDialogSessionSuccess;
+            _client.SessionUpdated += OnSessionUpdated;
             //mainWindow.Closed += vm.ClientStopCommand;
             this.MainWindow = mainWindow;
             //mainWindow.Show();
@@ -387,6 +389,19 @@ namespace EncryptMessangerClient
                 vm = MainWindow.DataContext as MainViewModel;
                 vm.AddMessages(args.GetDialogMessages(), args.Dialog);
             });
+        }
+        private void OnSessionUpdated(object sender, DialogSessionSuccessEventArgs args)
+        {
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+                vm.DeleteDialogMessages(args.DialogId);
+            });
+        }
+        private void OnSendFile(object sender, SendFileEventArgs args)
+        {
+            _client.SendFile(args.DialogId, args.SenderId, args.FilePath, args.FileName);
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

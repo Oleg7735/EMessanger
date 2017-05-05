@@ -14,13 +14,14 @@ public enum MessageType
     ClientClientSignKeyMessage, ClientOnlineMessage, ClientExitMessage, RegistrationMessage,
     DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
     DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage, 
-    DialogMessagesResponceMessage, DialogMessagesRequestMessage, FileFragmentMessage, EndFileMessage
+    DialogMessagesResponceMessage, DialogMessagesRequestMessage, FileFragmentMessage, EndFileMessage,
+    SendFileRequest, ReceiveFileRequest, DeleteMessagesRequestMessage
 };
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
     UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime, IP,
-    Port, BinaryData, Name
+    Port, BinaryData, Name, HasAttach, AttachName, AttachId
 };
 namespace EncryptMessanger.dll.Messages
 {
@@ -333,7 +334,22 @@ namespace EncryptMessanger.dll.Messages
                     {
                         message = new EndFileMessage();
                         break;
-                    }   
+                    }
+                case MessageType.SendFileRequest:
+                    {
+                        message = new SendFileRequest();
+                        break;
+                    }
+                case MessageType.ReceiveFileRequest:
+                    {
+                        message = new ReceiveFileRequest();
+                        break;
+                    }
+                case MessageType.DeleteMessagesRequestMessage:
+                    {
+                        message = new DeleteMessagesRequestMessage();
+                        break;
+                    }
                 default:
                     {
                         throw new ArgumentException(String.Format("Не определено действие по созданию объекта сообщения для сообщения типа {0}", type.ToString()));

@@ -11,11 +11,14 @@ using System.Diagnostics;
 using System.Threading;
 using EncryptMessanger.dll;
 using EncryptMessanger.dll.Messages;
+using EncryptMessanger.dll.Messages.FileMessages;
 using EncryptMessanger.dll.Encription;
 using EncryptMessanger.dll.Authentification;
 using EncryptMessangerClient.Events;
 using EncryptMessangerClient.Model;
 using EncryptMessanger.dll.SendibleData;
+using EncryptMessanger.dll.FileTransfer;
+using System.Net.NetworkInformation;
 
 namespace EncryptMessangerClient
 {
@@ -27,6 +30,8 @@ namespace EncryptMessangerClient
         private int _serverPort = 11000;
         //private const string _clientClientEncryptionIP = ;// = "192.168.0.100";
         private int _clientClientEncryptionPort = 11002;
+        private const int _fileSendPortStartIndex = 11100;
+        private const int _fileSendPortEndIndex = 11110;
         private TcpClient _client = new TcpClient();
         private MessageWriter _messageWriter;
         private MessageReader _messageReder;
@@ -46,6 +51,7 @@ namespace EncryptMessangerClient
         public EventHandler<DialogSessionFaildEventArgs> DialogSessionFaild;
         public EventHandler<DialogSessionSuccessEventArgs> DialogSessionSuccess;
         public EventHandler<MessagesReceivedEventArgs> MessagesInfoReceived;
+        public EventHandler<DialogSessionSuccessEventArgs> SessionUpdated;
         //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
 
         //private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
@@ -209,7 +215,14 @@ namespace EncryptMessangerClient
                                     {
                                         //Debug.WriteLine("Load message signature: " + Encoding.UTF8.GetString(info.Signature));
                                         //Debug.WriteLine("Load message text: " + Encoding.UTF8.GetString(info.Text));
-                                        args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
+                                        if (!info.HasAttach)
+                                        {
+                                            args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
+                                        }
+                                        else
+                                        {
+                                            args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId);
+                                        }
                                     }
                                     MessagesInfoReceived?.Invoke(this, args);
                                     
@@ -311,6 +324,25 @@ namespace EncryptMessangerClient
 
             return ipv4Adreses[ipv4Adreses.Length - 1];
         }
+        private int GetFreePort()
+        {
+            
+            IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
+            IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
+
+            List<int> usedPorts = tcpEndPoints.Select(p => p.Port).ToList<int>();
+            int unusedPort = 0;
+
+            for (int port = _fileSendPortStartIndex; port < _fileSendPortEndIndex; port++)
+            {
+                if (!usedPorts.Contains(port))
+                {
+                    unusedPort = port;
+                    break;
+                }
+            }
+            return unusedPort;
+        }
         private void LockClient()
         {
             isLocked = true;
@@ -335,6 +367,7 @@ namespace EncryptMessangerClient
                 {
                     ClientClientEncryptedSession newSession = await enc.ClientClientSenderEncryptAsync(new IPEndPoint(GetClientIp(), _clientClientEncryptionPort), response.Dialog, _currentUserId);
                     SessionAddOrReplase(newSession);
+                    _messageWriter.WriteMessage(new DeleteMessagesRequestMessage(response.Dialog, response.To));
                     DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(response.Dialog));
                 }
                 catch (Exception ex)
@@ -353,8 +386,8 @@ namespace EncryptMessangerClient
                 EncryptionProvider enc = new EncryptionProvider();
                 ClientClientEncryptedSession newSession = await enc.ClientClientResiverEncryptAsync(new IPEndPoint(request.Ip, request.Port), _currentUserId);
                 SessionAddOrReplase(newSession);
+                _messageWriter.WriteMessage(new DeleteMessagesRequestMessage(request.Dialog, _currentUserId));
                 DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(request.Dialog));
-
             }
             catch (Exception ex)
             {
@@ -452,6 +485,16 @@ namespace EncryptMessangerClient
         {
             _messageWriter.WriteMessage(new UserInfoRequestMessage(userId));
         }
+        public void SendFile(long dialogId, long senderId, string path, string name)
+        {
+            IPAddress clientAdress = GetClientIp();
+            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort());
+            FileSender fileSender = new FileSender();
+            ClientClientEncryptedSession session = FindSession(dialogId);
+            fileSender.SendFileToServerAsync(path, session, point);
+            _messageWriter.WriteMessage(new SendFileRequest(clientAdress.GetAddressBytes(), point.Port, senderId, dialogId, session.Encrypt(Encoding.UTF8.GetBytes(name))));
+        }
+        
         public void Stop()
         {
             _messageWriter.WriteMessage(new EndStreamMessage());

@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace EncryptMessanger.dll.FileTransfer
 {
-    class FileReceiver
+    public class FileReceiver
     {
         private int _dataDose = 256;
         public async Task<byte[]> ReceiveFileForServerAsync(string fileName, IPEndPoint point)
