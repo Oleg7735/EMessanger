@@ -60,6 +60,7 @@ namespace EncryptMessangerClient
             vm.LoadDialogSession += OnLoadDialogSession;
             vm.LoadDialogMessages += OnLoadDialogMessages;
             vm.FileSend += OnSendFile;
+            vm.DeleteProgress += DeleteFileSendProgress;
             mainWindow.Closed += MainWindow_Closed;
 
             _client.DialogSessionFaild += vm.OnDialogSessionFaild;
@@ -222,6 +223,21 @@ namespace EncryptMessangerClient
             }*/
             //throw new Exception("No implementation of App.Xml.OnClientOnline");
 
+        }
+        private void DeleteFileSendProgress(object sender, DeleteProgressEventArgs args)
+        {
+            MainViewModel vm = null;
+
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+            });
+            if (vm != null)
+            {
+                Dispatcher.Invoke(() => {
+                    vm.FileSendProgresses.Remove(args.Progress);
+                });
+            }
         }
         private void OnClientExit(object sender, ClientStatusExitEventArgs client)
         {
@@ -401,7 +417,7 @@ namespace EncryptMessangerClient
         }
         private void OnSendFile(object sender, SendFileEventArgs args)
         {
-            _client.SendFile(args.DialogId, args.SenderId, args.FilePath, args.FileName);
+            _client.SendFile(args.DialogId, args.SenderId, args.FilePath, args.FileName, args.UpdateProgressDelegate);
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

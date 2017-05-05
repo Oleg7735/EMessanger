@@ -14,9 +14,20 @@ using System.Threading;
 
 namespace EncryptMessanger.dll.FileTransfer
 {
+    public delegate void UpdateProgressBarDelegate(int value);
     public class FileSender
     {
         private int _dataDose = 256;
+        private UpdateProgressBarDelegate _updateProgressDelegate;
+
+        public  UpdateProgressBarDelegate UpdateProgressDelegate
+        {
+            set
+            {
+                _updateProgressDelegate = value;
+            }
+        }
+
         public async Task SendFileToServerAsync(string filePath, ClientClientEncryptedSession session, IPEndPoint point)
         {
             await Task.Run(() => {
@@ -47,8 +58,8 @@ namespace EncryptMessanger.dll.FileTransfer
             //считываем первый блок и добавляем к ниму реальную длину
             int bytesCount = stream.Read(dataBytes, 8, dataBytes.Length - 8);
             BitConverter.GetBytes(info.Length).CopyTo(dataBytes, 0);
-            bytesCount += 8;          
-             
+            bytesCount += 8;
+            double dataSended = 0; 
             session.InitStreamEncryptor();          
             while (bytesCount > 0)
             {
@@ -58,6 +69,8 @@ namespace EncryptMessanger.dll.FileTransfer
                 Array.Clear(dataBytes, 0, dataBytes.Length);
                 bytesCount = stream.Read(dataBytes, 0, dataBytes.Length);
 
+                dataSended += _dataDose;
+                _updateProgressDelegate?.Invoke((int)(dataSended/info.Length*100));
             } //chenged
             writer.WriteMessage(new EndFileMessage(signature));
             stream.Close();

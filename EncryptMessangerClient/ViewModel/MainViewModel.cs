@@ -12,6 +12,7 @@ using Microsoft.Win32;
 using System.IO;
 using EncryptMessangerClient.extensions;
 using EncryptMessangerClient.MessageBoxService;
+using EncryptMessanger.dll.FileTransfer;
 
 namespace EncryptMessangerClient.ViewModel
 {
@@ -21,6 +22,7 @@ namespace EncryptMessangerClient.ViewModel
         private UserInfo _currentUser;
         private List<UserInfo> _contacts = new List<UserInfo>();
         private IMsgBoxService _messageService;
+        private ObservableCollection<FileSendProgress> _fileSendProgresses = new ObservableCollection<FileSendProgress>();
         //private List<Attachment> _newMessageAttachments = new List<Attachment>();
         //private string _currentUserLogin;
 
@@ -129,6 +131,7 @@ namespace EncryptMessangerClient.ViewModel
         /// <param name="isAltered">было ли сообщение изменено при передаче</param>
         public void AddMessages(DialogMessage[] messages, long dialogId)
         {            
+            
             Dialog containerDialog = _dialogs.GetById(dialogId);
             UserInfo authorInfo;
             foreach (DialogMessage message in messages)
@@ -209,7 +212,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<LoadDialogMessagesEventArgs> LoadDialogMessages;
         public event EventHandler<LoadDialogSessionEventArgs> LoadDialogSession;
         public event EventHandler<SendFileEventArgs> FileSend;
-
+        public event EventHandler<DeleteProgressEventArgs> DeleteProgress;
 
         public Command MessageSendCommand { get; private set; }
         public Command MessageUpdateKaysCommand { get; private set; }
@@ -233,7 +236,10 @@ namespace EncryptMessangerClient.ViewModel
                 }
             }
         }
-
+        private void DeleteFileSendProgress(FileSendProgress progress)
+        {
+            DeleteProgress?.Invoke(this, new DeleteProgressEventArgs(progress));
+        }
         private void LoadFile(long attachId)
         {
             string fileName = _messageService.ShowSaveFileDialog("");
@@ -251,7 +257,10 @@ namespace EncryptMessangerClient.ViewModel
                 {
                     return;
                 }
-                FileSend?.Invoke(this, new SendFileEventArgs(newAttachment.Path, newAttachment.FileName, CurrentDialog.DialogId, CurrentUserId));
+                FileSendProgress newProgress = new FileSendProgress(newAttachment.FileName, new DeleteProgressDelegate(DeleteFileSendProgress));
+                _fileSendProgresses.Add(newProgress);
+
+                FileSend?.Invoke(this, new SendFileEventArgs(newAttachment.Path, newAttachment.FileName, CurrentDialog.DialogId, CurrentUserId, new UpdateProgressBarDelegate(newProgress.SetProgress)));
                 //DialogMessage newMessage = new DialogMessage(new UserInfo(CurrentUserId, CurrentUserLogin), newAttachment.FileName, DateTime.Now, false);
                 //newMessage.AddAttachment(newAttachment);
                 //CurrentDialog.DialogMessages.Add(newMessage);                
@@ -259,6 +268,7 @@ namespace EncryptMessangerClient.ViewModel
             //_newMessageAttachments.Add(newAttachment);
 
         }
+
         private bool CanSendFile()
         {
             return CurrentDialog != null;
@@ -349,7 +359,8 @@ namespace EncryptMessangerClient.ViewModel
             //LoadFileCommand = new Command(LoadFile, CanLoadFile);
             
             _currentUser = new UserInfo();
-            
+            //FileSendProgresses.Add(new FileSendProgress("file1", new DeleteProgressDelegate(DeleteFileSendProgress)));
+            //OnPropertyChanged("FileSendProgresses");
             //_dialogs.Add(new Model.Dialog("user3"));
         }
         /// <summary>
@@ -457,6 +468,19 @@ namespace EncryptMessangerClient.ViewModel
             set
             {
                 _messageService = value;
+            }
+        }
+
+        public ObservableCollection<FileSendProgress> FileSendProgresses
+        {
+            get
+            {
+                return _fileSendProgresses;
+            }
+
+            set
+            {
+                _fileSendProgresses = value;
             }
         }
 

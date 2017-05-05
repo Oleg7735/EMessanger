@@ -485,11 +485,15 @@ namespace EncryptMessangerClient
         {
             _messageWriter.WriteMessage(new UserInfoRequestMessage(userId));
         }
-        public void SendFile(long dialogId, long senderId, string path, string name)
+        public void SendFile(long dialogId, long senderId, string path, string name, UpdateProgressBarDelegate updateDelegate = null)
         {
             IPAddress clientAdress = GetClientIp();
             IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort());
             FileSender fileSender = new FileSender();
+            if(updateDelegate != null)
+            {
+                fileSender.UpdateProgressDelegate = updateDelegate;
+            }
             ClientClientEncryptedSession session = FindSession(dialogId);
             fileSender.SendFileToServerAsync(path, session, point);
             _messageWriter.WriteMessage(new SendFileRequest(clientAdress.GetAddressBytes(), point.Port, senderId, dialogId, session.Encrypt(Encoding.UTF8.GetBytes(name))));

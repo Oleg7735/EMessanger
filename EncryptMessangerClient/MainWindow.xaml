@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:EncryptMessangerClient"
         xmlns:vm="clr-namespace:EncryptMessangerClient.ViewModel"
         xmlns:m="clr-namespace:EncryptMessangerClient.Model"
+        
         mc:Ignorable="d"
         x:Uid="mainWindow"
         Title="EncryptedMessangerClient" Height="570" Width="850" 
@@ -53,7 +54,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition  Height="auto"></RowDefinition>
-                
+                <RowDefinition  Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
             
             <ListBox Grid.Row="0" x:Name="messagesListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Messages}">
@@ -81,7 +82,7 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <Grid Grid.Row="2">
+            <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"></RowDefinition>
                 </Grid.RowDefinitions>
@@ -97,6 +98,17 @@
             <Button  x:Uid="sendMessageButton" Content="Отправить" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch" Padding="7" Command="{Binding MessageSendCommand}" Grid.Row="0" Grid.Column="2"/>
 
             </Grid>
+            <ListBox  x:Name="progressListBox" Grid.Row="2" ItemsSource="{Binding FileSendProgresses}" Margin="5">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="local:FileSendProgress">
+                        <StackPanel Orientation="Vertical">
+                            <Label Content="{Binding Name}"></Label>
+                            <ProgressBar MinHeight="20"  Minimum="0" Maximum="100" Value="{Binding Progress}"></ProgressBar>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            
         </Grid>
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <MenuItem Header="Шифрование">
