@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessangerClient.Commands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace EncryptMessangerClient.Model
         private long _attachId;
         private bool _hasAttach = false;
         //private List<Attachment> _attaches = new List<Attachment>();
-
+        private CommandWithParametr _loadFileCommand;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public string Author
@@ -60,7 +61,7 @@ namespace EncryptMessangerClient.Model
             {
                 //if (Attachment == null)
                 //{
-                    return _text;
+                return _text;
                 //}
                 //else
                 //{
@@ -111,12 +112,13 @@ namespace EncryptMessangerClient.Model
         //    //}
         //}
 
-        public DialogMessage(UserInfo author, string text, DateTime sendDate, bool isAltered)
+        public DialogMessage(UserInfo author, string text, DateTime sendDate, bool isAltered, CommandWithParametr loadFileCommand)
         {
             _isAltered = isAltered;
             _text = text;
             _author = author;
             _sendDate = sendDate;
+            _loadFileCommand = loadFileCommand;
         }
         //public DialogMessage( string text, bool isAltered, DateTime sendDate)
         //{
@@ -145,14 +147,14 @@ namespace EncryptMessangerClient.Model
         //{
         //    get
         //    {
-        //        return Attaches[0];
+        //        return new Attachment();
         //    }
         //}
         public System.Windows.Visibility AttachButtonVisibility
         {
             get
             {
-                if(_hasAttach)
+                if (_hasAttach)
                 {
                     return System.Windows.Visibility.Visible;
                 }
@@ -162,6 +164,13 @@ namespace EncryptMessangerClient.Model
                 }
             }
         }
+        public LoadFileCommandParams LoadFileParams
+        {
+            get
+            {
+                return new LoadFileCommandParams(AttachId, Text);
+            }
+        }
         public long AttachId
         {
             get
@@ -169,6 +178,24 @@ namespace EncryptMessangerClient.Model
                 return _attachId;
             }
         }
-        
+        public CommandWithParametr LoadFileCommand
+        {
+            get
+            {
+                return _loadFileCommand;
+            }
+            set
+            {
+                if(value != null)
+                {
+                    _loadFileCommand = value;
+                }
+                
+            }
+        }
+        //private void Load(object param)
+        //{
+        //    LoadFileCommandParams p = param as LoadFileCommandParams;
+        //}
     }
 }

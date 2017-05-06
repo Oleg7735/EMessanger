@@ -90,11 +90,11 @@ namespace EncryptMessangerClient.Events
 
         public void AddMessage(long authorId, string text, DateTime sendTime, bool isAltered)
         {
-            _messages.Add(new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered));
+            _messages.Add(new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered, null));
         }
         public void AddMessage(long authorId, string text, DateTime sendTime, bool isAltered, long attachId)
         {
-            DialogMessage message = new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered);
+            DialogMessage message = new DialogMessage(new UserInfo(authorId), text, sendTime, isAltered, null);
             message.AddAttachment(attachId);
             _messages.Add(message);
         }

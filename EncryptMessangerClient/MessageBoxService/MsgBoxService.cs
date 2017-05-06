@@ -35,7 +35,6 @@ namespace EncryptMessangerClient.MessageBoxService
         /// Показывает пользователю диалог открытия файла. 
         /// </summary>
         /// <returns>Возвращает путь к файлу, если файл был выбран. Если файл не выбран возвращает null.</returns>
-
         public string ShowOpenFileDialog()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();

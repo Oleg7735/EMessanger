@@ -72,6 +72,15 @@ namespace EncryptMessanger.dll.Messages
             SetAtributeValue(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, text));
         }
+        public TextMessage(long from, long dialog, byte[] text)
+        {
+            init();
+            //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
+            //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
+            SetAtributeValue(new MessageAtribute(Atribute.DialogId, BitConverter.GetBytes(dialog)));
+            SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(from)));
+            _atributes.Add(new MessageAtribute(Atribute.Text, text));
+        }
         public void AddSignature(byte[] signature)
         {
             _atributes.Add(new MessageAtribute(Atribute.Signature,signature));

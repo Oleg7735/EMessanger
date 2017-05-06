@@ -122,7 +122,6 @@ namespace EncryptMessangerClient
                         case MessageType.CreateCryptoSessionRequest:
                             {
                                 CreateCryptoSessionRequest request = newMessage as CreateCryptoSessionRequest;
-
                                 CreateSessionAsReceiver(request);
                                 break;
                             }
@@ -369,6 +368,8 @@ namespace EncryptMessangerClient
                     SessionAddOrReplase(newSession);
                     _messageWriter.WriteMessage(new DeleteMessagesRequestMessage(response.Dialog, response.To));
                     DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(response.Dialog));
+                    SessionUpdated?.Invoke(this, new DialogSessionSuccessEventArgs(response.Dialog));
+
                 }
                 catch (Exception ex)
                 {
@@ -388,6 +389,7 @@ namespace EncryptMessangerClient
                 SessionAddOrReplase(newSession);
                 _messageWriter.WriteMessage(new DeleteMessagesRequestMessage(request.Dialog, _currentUserId));
                 DialogSessionSuccess?.Invoke(this, new DialogSessionSuccessEventArgs(request.Dialog));
+                SessionUpdated?.Invoke(this, new DialogSessionSuccessEventArgs(request.Dialog));
             }
             catch (Exception ex)
             {
@@ -424,8 +426,20 @@ namespace EncryptMessangerClient
             ClientClientEncryptedSession session = FindSession(dialog);
             if (session != null)
             {
-                session.ExportKeys(fileName);
+                session.ExportKeys(fileName, _currentUserId);
             }
+        }
+        public void ImportKeys(long dialogId, string fileName)
+        {
+            ClientClientEncryptedSession session = FindSession(dialogId);
+            if (session == null)
+            {
+                session = ClientClientEncryptedSession.EmptySession(dialogId);
+            }
+            //Боросает ArgumentException если для данной сессии ключи не подходят
+            session.ImportKeys(fileName, _currentUserId);
+            SessionAddOrReplase(session);
+            DialogSessionSuccess.Invoke(this, new DialogSessionSuccessEventArgs(dialogId));
 
         }
         private void SetSessionEncrSettings(long dialog, bool useSign, bool useEncrypt)
@@ -498,7 +512,16 @@ namespace EncryptMessangerClient
             fileSender.SendFileToServerAsync(path, session, point);
             _messageWriter.WriteMessage(new SendFileRequest(clientAdress.GetAddressBytes(), point.Port, senderId, dialogId, session.Encrypt(Encoding.UTF8.GetBytes(name))));
         }
-        
+        public void ReceiveFile(long dialogId, long attachId, string saveFileName)
+        {
+            IPAddress clientAdress = GetClientIp();
+            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort());
+            FileReceiver receiver = new FileReceiver();
+
+            ClientClientEncryptedSession session = FindSession(dialogId);
+            receiver.ReceiveFileForClientAsync(saveFileName, point, session);
+            _messageWriter.WriteMessage(new ReceiveFileRequest(attachId, clientAdress.GetAddressBytes(), point.Port));
+        }
         public void Stop()
         {
             _messageWriter.WriteMessage(new EndStreamMessage());

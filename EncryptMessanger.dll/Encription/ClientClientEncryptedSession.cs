@@ -37,7 +37,12 @@ namespace EncryptMessanger.dll.Encription
 
         private RSACryptoServiceProvider GetVerificationRsa(long authorId)
         {
-            return _verificationData.Find(x => x.UserID == authorId).RsaToVerify;
+            UserVerificationData varifyData = _verificationData.Find(x => x.UserID == authorId);
+            if(varifyData == null)
+            {
+                return null;
+            }
+            return varifyData.RsaToVerify;
         }
 
         public ClientClientEncryptedSession(AesManaged aes, long dialogId, RSACryptoServiceProvider rsaToSign, List<UserVerificationData> verificationData)
@@ -120,9 +125,12 @@ namespace EncryptMessanger.dll.Encription
             }
             return true;
         }
-        public void ExportKeys(string fileName)
+        public void ExportKeys(string fileName, long ownerId)
         {
+
             FileStream fs = new FileStream(fileName, FileMode.Create);
+            fs.Write(BitConverter.GetBytes(ownerId), 0, 8);
+            fs.Write(BitConverter.GetBytes(Dialog), 0, 8);
             //StreamWriter fWriter = new StreamWriter(fs);
             //fWriter.WriteLine(_rsaToVerify.ToXmlString(false));
             //fWriter.WriteLine(_rsaToSign.ToXmlString(true));
@@ -134,12 +142,17 @@ namespace EncryptMessanger.dll.Encription
             //fWriter.Write(_aes.Key);
             byte[] verificationDataCount = BitConverter.GetBytes(_verificationData.Count);
             fs.Write(verificationDataCount, 0, verificationDataCount.Length);
+            byte[] RsaToVerify;
+            byte[] LenRsaToVerify = new byte[4];
+            byte[] userIdBytes = new Byte[8];
             foreach (UserVerificationData verificationDada in _verificationData)
             {
-                byte[] RsaToVerify = Encoding.UTF8.GetBytes(verificationDada.RsaToVerify.ToXmlString(false));
-                byte[] LenRsaToVerify = new byte[4];
+                RsaToVerify = Encoding.UTF8.GetBytes(verificationDada.RsaToVerify.ToXmlString(false));
+                
                 LenRsaToVerify = BitConverter.GetBytes(RsaToVerify.Length);
+                userIdBytes = BitConverter.GetBytes(verificationDada.UserID);
 
+                fs.Write(userIdBytes, 0, userIdBytes.Length);
                 fs.Write(LenRsaToVerify, 0, LenRsaToVerify.Length);
                 fs.Write(RsaToVerify, 0, RsaToVerify.Length);
                               
@@ -162,6 +175,93 @@ namespace EncryptMessanger.dll.Encription
             fs.Write(LenK,0,4);
             fs.Write(_aes.Key,0,_aes.Key.Length);
             //fWriter.Close();
+            fs.Close();
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fileName">Путь к файлу с ключам шифрования</param>
+        /// <param name="ownerId">Идентификатор текущего пользователя</param>
+        public void ImportKeys(string fileName, long ownerId)
+        {
+            FileStream fs = new FileStream(fileName, FileMode.Open);
+
+            byte[] importDialogIdBytes = new byte[8];
+            byte[] importOwnerIdBytes = new byte[8];
+
+            fs.Read(importOwnerIdBytes, 0, importDialogIdBytes.Length);
+            fs.Read(importDialogIdBytes, 0, importDialogIdBytes.Length);
+            long importOwnerId = BitConverter.ToInt64(importOwnerIdBytes, 0);
+            long importDialogId = BitConverter.ToInt64(importDialogIdBytes, 0);
+            if(importOwnerId != ownerId || importDialogId != Dialog)
+            {
+                throw new ArgumentException("Заданный файл ключей не подходит для данного диалога или пользователя.");
+            }
+
+            byte[] verificationDataCountBytes = new byte [4];
+            fs.Read(verificationDataCountBytes, 0, verificationDataCountBytes.Length);
+            int verificationDataCount = BitConverter.ToInt32(verificationDataCountBytes, 0);
+            
+            byte[] lenRsaToVerifyBytes = new byte[4];
+            byte[] rsaToVerifyBytes;
+            byte[] userIdBytes = new Byte[8];
+            long userId;
+            int RsaToVerifyLength;
+            //Очищаем текущий список веификационных данных пользователей
+            this._verificationData.Clear();
+            for (int i = 0; i < verificationDataCount; i++)
+            {
+                fs.Read(userIdBytes, 0 ,userIdBytes.Length);
+                userId = BitConverter.ToInt64(userIdBytes, 0);
+
+                fs.Read(lenRsaToVerifyBytes, 0, lenRsaToVerifyBytes.Length);
+                RsaToVerifyLength = BitConverter.ToInt32(lenRsaToVerifyBytes, 0);
+
+                rsaToVerifyBytes = new byte[RsaToVerifyLength];
+                fs.Read(rsaToVerifyBytes, 0, rsaToVerifyBytes.Length);
+
+                RSACryptoServiceProvider provider = new RSACryptoServiceProvider();
+                provider.FromXmlString(Encoding.UTF8.GetString(rsaToVerifyBytes));
+                provider.PersistKeyInCsp = false;
+                UserVerificationData verificationDada = new UserVerificationData(userId, provider);
+                _verificationData.Add(verificationDada);
+            }
+
+            byte[] lenRsaToSignBytes = new byte[4];            
+            fs.Read(lenRsaToSignBytes, 0, lenRsaToSignBytes.Length);
+            int rsaToSignLength = BitConverter.ToInt32(lenRsaToSignBytes, 0);
+
+            byte[] rsaToSignBytes = new byte[rsaToSignLength];
+            fs.Read(rsaToSignBytes, 0, rsaToSignBytes.Length);
+
+            RSACryptoServiceProvider signProvider = new RSACryptoServiceProvider();
+            signProvider.PersistKeyInCsp = false;
+            signProvider.FromXmlString(Encoding.UTF8.GetString(rsaToSignBytes));
+            _rsaToSign = signProvider;
+
+
+
+            byte[] lenKBytes = new byte[4];
+            byte[] lenIVBytes = new byte[4];
+            int lenK;
+            int lenIV;
+
+            fs.Read(lenIVBytes, 0, lenIVBytes.Length);
+            lenIV = BitConverter.ToInt32(lenIVBytes, 0);
+            byte[] IVBytes = new byte[lenIV];
+            fs.Read(IVBytes, 0, IVBytes.Length);
+
+            fs.Read(lenKBytes, 0, lenKBytes.Length);
+            lenK = BitConverter.ToInt32(lenKBytes, 0);
+            byte[] keyBytes = new byte[lenK];
+            fs.Read(keyBytes, 0, keyBytes.Length);
+
+            _aes.IV = IVBytes;
+            _aes.Key = keyBytes;
+
+            _encryptor = _aes.CreateEncryptor();
+            _decryptor = _aes.CreateDecryptor();
             fs.Close();
 
         }
@@ -247,6 +347,40 @@ namespace EncryptMessanger.dll.Encription
             {
                 return _verificationData.ToArray();
             }
+        }
+        public bool SessionEquals(ClientClientEncryptedSession anotherSession)
+        {
+            if(! (_aes.IV.SequenceEqual(anotherSession.IV) && _aes.Key.SequenceEqual(anotherSession.EncryptionKey)))
+            {
+                return false;
+            }
+            if(! _rsaToSign.ToXmlString(true).Equals(anotherSession.RsaToSign.ToXmlString(true)))
+            {
+                return false;
+            }
+            if(_verificationData.Count != anotherSession.VerificationData.Length)
+            {
+                return false;
+            }
+            RSACryptoServiceProvider ferifyProvider;
+
+            foreach (UserVerificationData verifyData in anotherSession.VerificationData)
+            {
+                ferifyProvider = GetVerificationRsa(verifyData.UserID);
+                if (ferifyProvider == null)
+                {
+                    return false;
+                }
+                if(!ferifyProvider.ToXmlString(false).Equals(verifyData.RsaToVerify.ToXmlString(false)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static ClientClientEncryptedSession EmptySession(long dialogId)
+        {
+            return new ClientClientEncryptedSession(new AesManaged(), dialogId, null, new List<UserVerificationData>());
         }
     }
 }

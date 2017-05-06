@@ -49,6 +49,7 @@ namespace EncryptMessanger.dll.FileTransfer
             byte[] dataBytes = new byte[_dataDose];
 
             FileStream stream = new FileStream(filePath, FileMode.Open);
+            stream.Seek(0, SeekOrigin.Begin);
             byte[] signature = session.SignFile(stream);
             //byte[] nameBytes = session.Encrypt(Encoding.UTF8.GetBytes(info.Name));
             //byte[] realLength = BitConverter.GetBytes(info.Length);

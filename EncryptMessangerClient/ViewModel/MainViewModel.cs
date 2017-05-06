@@ -13,6 +13,7 @@ using System.IO;
 using EncryptMessangerClient.extensions;
 using EncryptMessangerClient.MessageBoxService;
 using EncryptMessanger.dll.FileTransfer;
+using EncryptMessangerClient.Commands;
 
 namespace EncryptMessangerClient.ViewModel
 {
@@ -102,6 +103,7 @@ namespace EncryptMessangerClient.ViewModel
                     OnPropertyChanged("Messages");
                     MessageSendCommand.RaiseCanExecuteChanged();
                     ExportKeysCommand.RaiseCanExecuteChanged();
+                    ImportKeysCommand.RaiseCanExecuteChanged();
                     EncryptSessionCommand.RaiseCanExecuteChanged();
                     UpdateDialogEncryptionKeysCommand.RaiseCanExecuteChanged();
                     SendFileCommand.RaiseCanExecuteChanged();
@@ -138,6 +140,7 @@ namespace EncryptMessangerClient.ViewModel
             {
                 authorInfo = _contacts.Find(x => x.Id == message.AuthorInfo.Id);
                 message.AuthorInfo = authorInfo;
+                message.LoadFileCommand = LoadFileCommand;
                 containerDialog.DialogMessages.Add(message);
             }
             containerDialog.SortMessages();
@@ -164,12 +167,12 @@ namespace EncryptMessangerClient.ViewModel
             {
                 //RequestUserInfo(interlocutor);
                 
-                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, sendDate, isAltered));
+                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, sendDate, isAltered, LoadFileCommand));
                 
             }
             else
             {
-                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, text, sendDate, isAltered));
+                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, text, sendDate, isAltered, LoadFileCommand));
                 
             }
                 //OnPropertyChanged("Messages");
@@ -204,6 +207,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<MessageSendEventArgs> MessageSend;
         public event EventHandler StopClient;
         public event EventHandler<ExportKeysEventArgs> ExportKeysEventHandler;
+        public event EventHandler<ImportKeysEventArgs> ImportKeysEventHandler;
         public event EventHandler EditEncryptionSettings ;
         public event EventHandler<EncryptionSettingsEventArgs> EncryptionSettingsChanged;
         public event EventHandler<DialogsRequestEventArgs> DialogsRequest;
@@ -212,16 +216,18 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<LoadDialogMessagesEventArgs> LoadDialogMessages;
         public event EventHandler<LoadDialogSessionEventArgs> LoadDialogSession;
         public event EventHandler<SendFileEventArgs> FileSend;
+        public event EventHandler<LoadFileEventArgs> FileLoad;
         public event EventHandler<DeleteProgressEventArgs> DeleteProgress;
 
         public Command MessageSendCommand { get; private set; }
         public Command MessageUpdateKaysCommand { get; private set; }
         public Command ClientStopCommand { get; private set; }
         public Command ExportKeysCommand { get; private set; }
+        public Command ImportKeysCommand { get; private set; }
         public Command EncryptSessionCommand { get; private set; }
         public Command UpdateDialogEncryptionKeysCommand { get; private set; }
         public Command SendFileCommand { get; private set; }
-        public Command LoadFileCommand { get; private set; }
+        public CommandWithParametr LoadFileCommand { get; private set; }
 
         public string MessageBox
         {
@@ -240,9 +246,11 @@ namespace EncryptMessangerClient.ViewModel
         {
             DeleteProgress?.Invoke(this, new DeleteProgressEventArgs(progress));
         }
-        private void LoadFile(long attachId)
+        private void LoadFile(object loadFileCommandParams)
         {
-            string fileName = _messageService.ShowSaveFileDialog("");
+            LoadFileCommandParams loadParams = (LoadFileCommandParams)loadFileCommandParams;
+            string fileName = _messageService.ShowSaveFileDialog(loadParams.AttachName);
+            FileLoad?.Invoke(this, new LoadFileEventArgs(loadParams.AttachId, CurrentDialog.DialogId,fileName));
         }
         private bool CanLoadFile()
         {
@@ -321,6 +329,22 @@ namespace EncryptMessangerClient.ViewModel
         {
             return CurrentDialog != null;
         }
+        private void ImportKeys()
+        {
+            string fileName = _messageService.ShowOpenFileDialog();
+
+            if (fileName != null)
+            {
+                if (CurrentDialog != null)
+                {
+                    ImportKeysEventHandler?.Invoke(this, new ImportKeysEventArgs(CurrentDialog.DialogId, fileName));
+                }
+            }
+        }
+        private bool CanImportKeys()
+        {
+            return CurrentDialog != null;
+        }
         private void EditEncryptionSetting()
         {
             EditEncryptionSettings?.Invoke(this, EventArgs.Empty);
@@ -356,8 +380,9 @@ namespace EncryptMessangerClient.ViewModel
             EncryptSessionCommand = new Command(EditEncryptionSetting, CanEditEncryptionSetting);
             UpdateDialogEncryptionKeysCommand = new Command(UpdateDialogEncryptionKeys, CanUpdateDialogEncryptionKeys);
             SendFileCommand = new Command(SendFile, CanSendFile);
-            //LoadFileCommand = new Command(LoadFile, CanLoadFile);
-            
+            LoadFileCommand = new CommandWithParametr(LoadFile, CanLoadFile);
+            ImportKeysCommand = new Command(ImportKeys, CanImportKeys);
+
             _currentUser = new UserInfo();
             //FileSendProgresses.Add(new FileSendProgress("file1", new DeleteProgressDelegate(DeleteFileSendProgress)));
             //OnPropertyChanged("FileSendProgresses");
@@ -513,6 +538,10 @@ namespace EncryptMessangerClient.ViewModel
         {
             _messageService.ShowNotification("Ключи шифрования успешно обновлены");
             Dialogs.GetById(arg.DialogId).ClearDialogSessionError();
+        }
+        public void ShowError(string message)
+        {
+            _messageService.ShowNotification(message);
         }
         public void DeleteDialogMessages(long dialogId)
         {

@@ -93,7 +93,7 @@
     <Compile Include="Messages\EndStreamMessage.cs" />
     <Compile Include="Messages\FileMessages\EndFileMessage.cs" />
     <Compile Include="Messages\FileMessages\FileFragmentMessage.cs" />
-    <Compile Include="Messages\FileMessages\RecceiveFileRequest.cs" />
+    <Compile Include="Messages\FileMessages\ReceiveFileRequest.cs" />
     <Compile Include="Messages\FileMessages\SendFileRequest.cs" />
     <Compile Include="Messages\Message.cs" />
     <Compile Include="Messages\ProcessedMessage.cs" />
@@ -117,6 +117,7 @@
     <Compile Include="SendibleData\ISendibleData.cs" />
     <Compile Include="SendibleData\MessageSendibleInfo.cs" />
     <Compile Include="Tests\DialogSendibleInfoTest.cs" />
+    <Compile Include="Tests\ExportKeysTest.cs" />
     <Compile Include="Tests\FileTransferTest.cs" />
     <Compile Include="Tests\MessageDeliverTests.cs" />
     <Compile Include="Tests\MessageTest.cs" />

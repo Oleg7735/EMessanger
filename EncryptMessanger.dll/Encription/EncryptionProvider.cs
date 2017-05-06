@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace EncryptMessanger.dll.Encription
 {
@@ -135,6 +136,10 @@ namespace EncryptMessanger.dll.Encription
                 currentUserVerificationRsa.PersistKeyInCsp = false;
                 currentUserVerificationRsa.ImportParameters(encryptRsaForSign.ExportParameters(false));
                 verificationData.Add(new UserVerificationData(senderId, currentUserVerificationRsa));
+                //while(sessionUpdateConnection.GetStream().DataAvailable)
+                //{
+                //    Thread.Sleep(100);
+                //}
                 //ICryptoTransform encrptTransform = aes.CreateEncryptor();
                 //ICryptoTransform decryptTransform = aes.CreateDecryptor();
                 return new ClientClientEncryptedSession(aes, dialogId, encryptRsaForSign, verificationData);

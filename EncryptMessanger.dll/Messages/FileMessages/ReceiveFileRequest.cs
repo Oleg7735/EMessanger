@@ -13,11 +13,12 @@ namespace EncryptMessanger.dll.Messages.FileMessages
         {
             _type = MessageType.ReceiveFileRequest;
         }
-        public ReceiveFileRequest(byte[] ip, int port)
+        public ReceiveFileRequest(long attahId, byte[] ip, int port)
         {
             Init();
             SetAtributeValue(new MessageAtribute(Atribute.IP, ip));
             Port = port;
+            AttachId = attahId;
         }
         public ReceiveFileRequest()
         {
@@ -43,6 +44,17 @@ namespace EncryptMessanger.dll.Messages.FileMessages
             set
             {
                 SetAtributeValue(new MessageAtribute(Atribute.Port, BitConverter.GetBytes(value)));
+            }
+        }
+        public long AttachId
+        {
+            get
+            {
+                return BitConverter.ToInt64(GetAttribute(Atribute.AttachId), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.AttachId, BitConverter.GetBytes(value)));
             }
         }
     }

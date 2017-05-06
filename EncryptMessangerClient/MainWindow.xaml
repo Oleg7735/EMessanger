@@ -76,7 +76,7 @@
                                 <Label Content="{Binding Text}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  Grid.Row="1"></Label>
                                 <Label Content="{Binding SendDate}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontStyle="Italic" Foreground="DarkGray" Grid.Row="2" Grid.Column="0"></Label>
                                 <Label Content="{Binding AlteredErrorMessage}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Foreground="Red" Grid.Column="0"></Label>
-                                <Button Visibility="{Binding AttachButtonVisibility}" Content="Загрузить" CommandParameter="{Binding AttachId}" Grid.Column="1" Grid.Row="1"></Button>
+                                <Button Visibility="{Binding AttachButtonVisibility}" Content="Загрузить" Command="{Binding LoadFileCommand}" CommandParameter="{Binding LoadFileParams}" Grid.Column="1" Grid.Row="1"></Button>
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -113,6 +113,7 @@
         <Menu Grid.Row="0" Grid.ColumnSpan="2">
             <MenuItem Header="Шифрование">
                 <MenuItem Header="Экспорт ключей" Command="{Binding ExportKeysCommand}"></MenuItem>
+                <MenuItem Header="Импорт ключей" Command="{Binding ImportKeysCommand}"></MenuItem>
                 <MenuItem Header="Настройки" Command="{Binding EncryptSessionCommand}"></MenuItem>
                 <MenuItem Header="Обновить ключи шифрования" Command="{Binding UpdateDialogEncryptionKeysCommand}"></MenuItem>
             </MenuItem>

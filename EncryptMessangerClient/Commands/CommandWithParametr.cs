@@ -9,19 +9,39 @@ namespace EncryptMessangerClient.Commands
 {
     class CommandWithParametr : ICommand
     {
-        private Action _canEecute;
-        private Action<long> _execute;
+        private Action<object> _targetExecuteAction;
+        private Func<bool> _targetCanExecuteMethod;
         public event EventHandler CanExecuteChanged;
+
+        public CommandWithParametr(Action<object> executeAction)
+        {
+            _targetExecuteAction = executeAction;
+        }
+
+        public CommandWithParametr(Action<object> executeAction, Func<bool> canExecuteMethod)
+        {
+            _targetExecuteAction = executeAction;
+            _targetCanExecuteMethod = canExecuteMethod;
+        }
+
+        public void RaiseCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         public bool CanExecute(object parameter)
         {
-            //return _canEecute.Invoke();
-            return true;
+            if (_targetCanExecuteMethod != null)
+            {
+                return _targetCanExecuteMethod();
+            }
+
+            return _targetExecuteAction != null;
         }
 
         public void Execute(object parameter)
         {
-            throw new NotImplementedException();
+            _targetExecuteAction?.Invoke(parameter);
         }
     }
 }

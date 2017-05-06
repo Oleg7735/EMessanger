@@ -52,6 +52,7 @@ namespace EncryptMessangerClient
             CurrentClient.Resive += Client_NewMessage;
             vm.StopClient += OnClientStop;
             vm.ExportKeysEventHandler += OnExportKeys;
+            vm.ImportKeysEventHandler += OnImportKeys;
             vm.EditEncryptionSettings += OnEditEncryptionSettings;
             vm.EncryptionSettingsChanged += OnEncryptionSettingChangedByUser;
             vm.DialogsRequest += OnDialogsRequest;
@@ -60,6 +61,7 @@ namespace EncryptMessangerClient
             vm.LoadDialogSession += OnLoadDialogSession;
             vm.LoadDialogMessages += OnLoadDialogMessages;
             vm.FileSend += OnSendFile;
+            vm.FileLoad += OnLoadFile;
             vm.DeleteProgress += DeleteFileSendProgress;
             mainWindow.Closed += MainWindow_Closed;
 
@@ -263,6 +265,27 @@ namespace EncryptMessangerClient
         {
             _client.ExportKeys(exportArgs.Dialog, exportArgs.FileName); 
         }
+        private void OnImportKeys(object sener, ImportKeysEventArgs args)
+        {
+            try
+            {
+                _client.ImportKeys(args.DialogId, args.FileName);
+            }
+            catch(ArgumentException)
+            {
+                MainViewModel vm = null;
+                Dispatcher.Invoke(() =>
+                {
+                    vm = MainWindow.DataContext as MainViewModel;
+                });
+                if (vm != null)
+                {
+                    Dispatcher.Invoke(() => {
+                       vm.ShowError("Данный файл ключей не подходит для текущего пользователя или для выбранного диалога.");
+                    });
+                }
+            }
+        }
         private void OnEncryptionSettingsFormClosed(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
@@ -418,6 +441,10 @@ namespace EncryptMessangerClient
         private void OnSendFile(object sender, SendFileEventArgs args)
         {
             _client.SendFile(args.DialogId, args.SenderId, args.FilePath, args.FileName, args.UpdateProgressDelegate);
+        }
+        private void OnLoadFile(object sender, LoadFileEventArgs args)
+        {
+            _client.ReceiveFile(args.DialogId, args.AttachmentId, args.FileName);
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

@@ -76,6 +76,7 @@
       <DependentUpon>AuthWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Commands\CommandWithParametr.cs" />
+    <Compile Include="Commands\LoadFileCommandParams.cs" />
     <Compile Include="EncryptedSessionManager.cs" />
     <Compile Include="EncryptionSettings.xaml.cs">
       <DependentUpon>EncryptionSettings.xaml</DependentUpon>
@@ -93,10 +94,12 @@
     <Compile Include="Events\DialogUserInfoReceivedEventArgs.cs" />
     <Compile Include="Events\EncryptionSettingsEventArgs.cs" />
     <Compile Include="Events\ExportKeysEventArgs.cs" />
+    <Compile Include="Events\ImportKeysEventArgs.cs" />
     <Compile Include="Events\LoadDialogMessagesEventArgs.cs" />
     <Compile Include="Events\LoadDialogSessionEventArgs.cs" />
     <Compile Include="Events\LoadDialogSessionFaildEventArgs.cs" />
     <Compile Include="Events\LoadDialogUserInfoEventArgs.cs" />
+    <Compile Include="Events\LoadFileEventArgs.cs" />
     <Compile Include="Events\MessageSendEventArgs.cs" />
     <Compile Include="Events\MessagesReceivedEventArgs.cs" />
     <Compile Include="Events\NewMessageEventArgs.cs" />
