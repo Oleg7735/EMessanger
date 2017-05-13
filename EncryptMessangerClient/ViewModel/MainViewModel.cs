@@ -14,16 +14,24 @@ using EncryptMessangerClient.extensions;
 using EncryptMessangerClient.MessageBoxService;
 using EncryptMessanger.dll.FileTransfer;
 using EncryptMessangerClient.Commands;
+using EncryptMessanger.dll.Enums;
 
 namespace EncryptMessangerClient.ViewModel
 {
     class MainViewModel : INotifyPropertyChanged
     {
         private const int _dialogsRequestCount = 20;
+        private const int _messagesRequestCount = 10;
+        private const int _usersRequestCount = 15;
         private UserInfo _currentUser;
         private List<UserInfo> _contacts = new List<UserInfo>();
         private IMsgBoxService _messageService;
         private ObservableCollection<FileSendProgress> _fileSendProgresses = new ObservableCollection<FileSendProgress>();
+        private ObservableCollection<UserInfo> _usersFind = new ObservableCollection<UserInfo>();
+        private int _findUserSelectedIndex = -1;
+        private string _userNameToSearch;
+        private string _createDialogName;
+
         //private List<Attachment> _newMessageAttachments = new List<Attachment>();
         //private string _currentUserLogin;
 
@@ -92,7 +100,8 @@ namespace EncryptMessangerClient.ViewModel
                         }
                         if (!_currentDialog.SessionError)
                         {
-                            LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, 20, 0));
+                            if(_currentDialog.DialogMessages.Count == 0)
+                            LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(_currentDialog.DialogId, _messagesRequestCount, _currentDialog.DialogMessages.Count));
                         }
                         else
                         {
@@ -139,14 +148,21 @@ namespace EncryptMessangerClient.ViewModel
             foreach (DialogMessage message in messages)
             {
                 authorInfo = _contacts.Find(x => x.Id == message.AuthorInfo.Id);
-                message.AuthorInfo = authorInfo;
+                if (authorInfo != null)
+                {
+                    message.AuthorInfo = authorInfo;
+                }
                 message.LoadFileCommand = LoadFileCommand;
                 containerDialog.DialogMessages.Add(message);
             }
             containerDialog.SortMessages();
             OnPropertyChanged("Messages");
+            if(containerDialog.DialogMessages.Count == messages.Length)
+            {
+                ScrollMessages?.Invoke(this, EventArgs.Empty);
+            }
         }
-        public void AddMessage(long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
+        public void AddMessage(long messageId, long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
         {
             //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
             if(CurrentDialog == null)
@@ -167,12 +183,12 @@ namespace EncryptMessangerClient.ViewModel
             {
                 //RequestUserInfo(interlocutor);
                 
-                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), text, sendDate, isAltered, LoadFileCommand));
+                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), messageId, text, sendDate, isAltered, LoadFileCommand));
                 
             }
             else
             {
-                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, text, sendDate, isAltered, LoadFileCommand));
+                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, messageId, text, sendDate, isAltered, LoadFileCommand));
                 
             }
                 //OnPropertyChanged("Messages");
@@ -208,7 +224,9 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler StopClient;
         public event EventHandler<ExportKeysEventArgs> ExportKeysEventHandler;
         public event EventHandler<ImportKeysEventArgs> ImportKeysEventHandler;
-        public event EventHandler EditEncryptionSettings ;
+        public event EventHandler EditEncryptionSettings;
+        public event EventHandler StartDialogCreationHandler;
+        public event EventHandler CanselDialogCreationHandler;
         public event EventHandler<EncryptionSettingsEventArgs> EncryptionSettingsChanged;
         public event EventHandler<DialogsRequestEventArgs> DialogsRequest;
         public event EventHandler<UpdateDialogEncryptionKeysEventArgs> UpdateDialogKeys;
@@ -218,6 +236,9 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<SendFileEventArgs> FileSend;
         public event EventHandler<LoadFileEventArgs> FileLoad;
         public event EventHandler<DeleteProgressEventArgs> DeleteProgress;
+        public event EventHandler<SearchUserEventArgs> SearchUserHandler;
+        public event EventHandler ScrollMessages;
+        public event EventHandler<CreateDialogEventArgs> CreateDialogHandler;
 
         public Command MessageSendCommand { get; private set; }
         public Command MessageUpdateKaysCommand { get; private set; }
@@ -228,6 +249,10 @@ namespace EncryptMessangerClient.ViewModel
         public Command UpdateDialogEncryptionKeysCommand { get; private set; }
         public Command SendFileCommand { get; private set; }
         public CommandWithParametr LoadFileCommand { get; private set; }
+        public Command SearchUserCommand { get; private set; }
+        public Command CreateDialogCommand { get; private set; }
+        public Command CanselDialogCreationCommand { get; private set; }
+        public Command OpenDialogCreationCommand { get; private set; }
 
         public string MessageBox
         {
@@ -275,15 +300,36 @@ namespace EncryptMessangerClient.ViewModel
             }            
             //_newMessageAttachments.Add(newAttachment);
 
-        }
-
+        }       
         private bool CanSendFile()
         {
             return CurrentDialog != null;
         }
+        private void CreateDialog()
+        {
+            UserInfo selectedUser = _usersFind[FindUserSelectedIndex];
+            if (selectedUser.State != UserState.Online)
+            {
+                _messageService.ShowNotification("Невозможно создать диалог с выбранным пользователем, так как он сейчас offline.");
+                return;
+            }
+            CreateDialogHandler?.Invoke(this, new CreateDialogEventArgs(CurrentUserId, new long[] { selectedUser.Id}, CreateDialogName));
+        }
+        private bool CanCreateDialog()
+        {
+            if(String.IsNullOrEmpty(_createDialogName))
+            {
+                return false;
+            }
+            if (String.IsNullOrWhiteSpace(_createDialogName))
+            {
+                return false;
+            }
+            return true;
+        }
         //private void DeattachFile()
         //{
-            
+
         //}
         //private bool CanDeattachFile()
         //{
@@ -360,6 +406,14 @@ namespace EncryptMessangerClient.ViewModel
         }
         private void UpdateDialogEncryptionKeys()
         {
+            foreach(long id in CurrentDialog.MembersId)
+            {
+                if(_contacts.Find(c => c.Id == id).State != UserState.Online)
+                {
+                    _messageService.ShowNotification("Вы не можете обновить ключи шифрования если все участики диалога не онлайн");
+                    return;
+                }
+            }
             if (_messageService.ShowQuestion("При обновлении ключей старые сообщения будут недоступны. Обновить ключи?"))
             {
                 UpdateDialogKeys?.Invoke(this, new UpdateDialogEncryptionKeysEventArgs(Dialogs[DialogSelectedIndex].DialogId, _currentUser.Id));
@@ -372,6 +426,23 @@ namespace EncryptMessangerClient.ViewModel
             LoadDialogSession?.Invoke(this, new LoadDialogSessionEventArgs(dialogId));
         }
 
+        private void OpenDialogCreation()
+        {
+            StartDialogCreationHandler?.Invoke(this, EventArgs.Empty);
+        }
+        private bool CanOpenDialogCreation()
+        {
+            return true;
+        }
+        private void SearchUser()
+        {
+            _usersFind.Clear(); 
+            SearchUserHandler?.Invoke(this, new SearchUserEventArgs(_userNameToSearch, 0, _usersRequestCount));
+        }
+        private bool CanSearchUser()
+        {
+            return !String.IsNullOrEmpty(_userNameToSearch);
+        }
         public MainViewModel()
         {
             MessageSendCommand = new Command(SendMessage, CanSendMessage);
@@ -382,6 +453,9 @@ namespace EncryptMessangerClient.ViewModel
             SendFileCommand = new Command(SendFile, CanSendFile);
             LoadFileCommand = new CommandWithParametr(LoadFile, CanLoadFile);
             ImportKeysCommand = new Command(ImportKeys, CanImportKeys);
+            OpenDialogCreationCommand = new Command(OpenDialogCreation, CanOpenDialogCreation);
+            SearchUserCommand = new Command(SearchUser, CanSearchUser);
+            CreateDialogCommand = new Command(CreateDialog, CanCreateDialog);
 
             _currentUser = new UserInfo();
             //FileSendProgresses.Add(new FileSendProgress("file1", new DeleteProgressDelegate(DeleteFileSendProgress)));
@@ -509,6 +583,80 @@ namespace EncryptMessangerClient.ViewModel
             }
         }
 
+        public string UserNameToSearch
+        {
+            get
+            {
+                return _userNameToSearch;
+            }
+
+            set
+            {
+                if(!(String.IsNullOrEmpty(value) || String.IsNullOrWhiteSpace(value)))
+                {
+                    if(_userNameToSearch != value)
+                    {
+                        _userNameToSearch = value;
+                        OnPropertyChanged();
+                        SearchUserCommand.RaiseCanExecuteChanged();
+                    }
+                }
+                
+            }
+        }
+
+        public  ObservableCollection<UserInfo> UsersFind
+        {
+            get
+            {
+                return _usersFind;
+            }
+
+            set
+            {
+                _usersFind = value;
+            }
+        }
+
+        public int FindUserSelectedIndex
+        {
+            get
+            {
+                return _findUserSelectedIndex;
+            }
+
+            set
+            {
+                if(_findUserSelectedIndex != value && value > -1)
+                {
+                    _findUserSelectedIndex = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string CreateDialogName
+        {
+            get
+            {
+                return _createDialogName;
+            }
+
+            set
+            {
+                if(!String.IsNullOrEmpty(value) && !String.IsNullOrWhiteSpace(value))
+                {
+                    if (_createDialogName != value)
+                    {
+                        _createDialogName = value;
+                        OnPropertyChanged();
+                        CreateDialogCommand.RaiseCanExecuteChanged();
+                    }
+                }
+               
+            }
+        }
+
         //public List<Attachment> NewMessageAttachments
         //{
         //    get
@@ -521,7 +669,37 @@ namespace EncryptMessangerClient.ViewModel
         //        _newMessageAttachments = value;
         //    }
         //}
-
+        public void ClientExit(long clientId)
+        {
+            UserInfo info = _contacts.Find(contact => contact.Id == clientId);
+            if (info != null)
+            { 
+                info.State = UserState.Offline;
+                OnPropertyChanged("Messages");
+            }
+            info = _usersFind.Where(u => u.Id == clientId).FirstOrDefault();
+            if (info != null)
+            {
+                info.State = UserState.Offline;
+                OnPropertyChanged("UsersFind");
+            }
+        }
+        public void ClientOnline(long clientId)
+        {
+            UserInfo info = _contacts.Find(contact => contact.Id == clientId);
+            if (info != null)
+            {
+                info.State = UserState.Online;
+                OnPropertyChanged("Messages");
+            }
+            info = _usersFind.Where(u => u.Id == clientId).FirstOrDefault();
+            if (info != null)
+            {
+                info.State = UserState.Online;
+                OnPropertyChanged("UsersFind");
+            }
+            //_contacts.Find(contact => contact.Id == clientId).State = UserState.Online;
+        }
         public void AddDialog(Dialog dialog)
         {
             if (!_dialogs.Contains(dialog))
@@ -552,5 +730,21 @@ namespace EncryptMessangerClient.ViewModel
                 OnPropertyChanged("Messages");
             }
         }
+
+        public void OnMessagesScroll(object sender, System.Windows.Controls.ScrollChangedEventArgs args)
+        {
+            var scrollViewer = (System.Windows.Controls.ScrollViewer)sender;
+            if (scrollViewer.VerticalOffset == 0 && CurrentDialog != null && CurrentDialog.DialogMessages.Count != 0)
+            {
+                LoadDialogMessages?.Invoke(this, new LoadDialogMessagesEventArgs(CurrentDialog.DialogId, _messagesRequestCount, CurrentDialog.DialogMessages.Count));
+            }
+            
+        }
+        public void AddWantedUser(long userId, string login, UserState state)
+        {
+            _usersFind.Add(new UserInfo(userId, login, state));
+            OnPropertyChanged("UsersFind");
+        }
+        
     }
 }

@@ -136,6 +136,17 @@ namespace EncryptMessanger.dll.Messages
             //AttachName = attachName;
             HasAttach = true;
         }
+        public long  MessageId
+        {
+            get
+            {
+                return BitConverter.ToInt64(GetAttribute(Atribute.MessageId), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.MessageId, BitConverter.GetBytes(value)));
+            }
+        }
         public override string ToString()
         {
             return "Text message from user " + From + " to dalog" + Dialog + " text = " + Text + " Signature = " + Encoding.UTF8.GetString(GetSignature());

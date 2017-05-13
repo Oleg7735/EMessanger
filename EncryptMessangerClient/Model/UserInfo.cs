@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessanger.dll.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace EncryptMessangerClient.Model
     {
         private string _login;
         private long _id;
+        private UserState _state;
 
         public UserInfo()
         {
@@ -19,10 +21,11 @@ namespace EncryptMessangerClient.Model
         {
             _id = id;            
         }
-        public UserInfo(long id, string login)
+        public UserInfo(long id, string login, UserState state)
         {
             _id = id;
             _login = login;
+            _state = state;
         }
 
         public string Login
@@ -51,5 +54,25 @@ namespace EncryptMessangerClient.Model
             }
         }
 
+        public UserState State
+        {
+            get
+            {
+                return _state;
+            }
+
+            set
+            {
+                _state = value;
+                
+            }
+        }
+        public string StringState
+        {
+            get
+            {
+                return _state.ToString();
+            }
+        }
     }
 }

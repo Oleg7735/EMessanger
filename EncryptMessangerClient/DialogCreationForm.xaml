@@ -1,0 +1,68 @@
+﻿<Window x:Class="EncryptMessangerClient.DialogCreationForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EncryptMessangerClient"
+        mc:Ignorable="d"
+        xmlns:vm="clr-namespace:EncryptMessangerClient.ViewModel"
+        xmlns:m="clr-namespace:EncryptMessangerClient.Model"
+        Title="Создание диалога" Height="450" Width="300">
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding UserNameToSearch, UpdateSourceTrigger=PropertyChanged}" Padding="3" Margin="5"></TextBox>
+            <Button Command="{Binding SearchUserCommand}"  Content="Поиск" Padding="3" Margin="5" Grid.Column="1"></Button>
+        </Grid>
+
+        <ListBox Grid.Row="1" Margin="5" x:Name="usersListBox" ItemsSource="{Binding UsersFind}" SelectedIndex="{Binding FindUserSelectedIndex}">
+            <ListBox.ItemTemplate >
+                <DataTemplate DataType="m:UserInfo">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition></RowDefinition>
+                            <RowDefinition></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label x:Name="userNameLabel" Grid.Row="0" Content="{Binding Login}" Padding="2"></Label>
+                        <Label x:Name="userStateLabel" Grid.Row="1" Content="{Binding StringState}" Foreground="DarkGray" Padding="2" Margin="0,0,0,5"></Label>
+                    </Grid>                   
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="dialogNameText" Grid.Column="0" Margin="5" Text="{Binding CreateDialogName, UpdateSourceTrigger=PropertyChanged}"></TextBox>
+            <TextBlock IsHitTestVisible="False" Grid.Column="0" Text="Введите имя диалога" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" FontStyle="Italic" Foreground="DarkGray">
+                <TextBlock.Style>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Text, ElementName=dialogNameText}" Value="">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+            <Button Content="Создать диалог" Command="{Binding CreateDialogCommand}" Margin="5" Padding="3" HorizontalAlignment="Right" Grid.Row="2" Grid.Column="1"></Button>
+
+            <!--<Button Content="Отмена" Margin="5" Command="{Binding CanselDialogCreationCommand}" Padding="3" HorizontalAlignment="Right" Grid.Row="2"></Button>-->
+        </Grid>
+       
+    </Grid>
+</Window>

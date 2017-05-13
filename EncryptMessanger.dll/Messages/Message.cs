@@ -1,4 +1,6 @@
-﻿using EncryptMessanger.dll.Messages.FileMessages;
+﻿using EncryptMessanger.dll.Messages.DialogCreation;
+using EncryptMessanger.dll.Messages.FileMessages;
+using EncryptMessanger.dll.Messages.UserSearch;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,14 +17,18 @@ public enum MessageType
     DialogEncryptionSettingsMessage, RegistrationSuccessMessage, RegistrationErrorMessage,
     DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage, 
     DialogMessagesResponceMessage, DialogMessagesRequestMessage, FileFragmentMessage, EndFileMessage,
-    SendFileRequest, ReceiveFileRequest, DeleteMessagesRequestMessage
+    SendFileRequest, ReceiveFileRequest, DeleteMessagesRequestMessage, UserSearchRequestMessage,
+    SearchUserResponceMessage, CreateDialogRequestMessage, DialogCreatedMessage, CreateDialogResponceMessage
+
 };
 public enum Atribute
 {
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
     UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime, IP,
-    Port, BinaryData, Name, HasAttach, AttachName, AttachId
+    Port, BinaryData, Name, HasAttach, AttachName, AttachId, UserState, CreatorId, MemberId, DialogName,
+    ResponceState, Error, MessageId
 };
+
 namespace EncryptMessanger.dll.Messages
 {
     public class Message:ISendibleData
@@ -348,6 +354,31 @@ namespace EncryptMessanger.dll.Messages
                 case MessageType.DeleteMessagesRequestMessage:
                     {
                         message = new DeleteMessagesRequestMessage();
+                        break;
+                    }
+                case MessageType.UserSearchRequestMessage:
+                    {
+                        message = new SearchUserRequestMessage();
+                        break;
+                    }
+                case MessageType.SearchUserResponceMessage:
+                    {
+                        message = new SearchUserResponceMessage();
+                        break;
+                    }
+                case MessageType.CreateDialogRequestMessage:
+                    {
+                        message = new CreateDialogRequestMessage();
+                        break;
+                    }
+                case MessageType.DialogCreatedMessage:
+                    {
+                        message = new DialogCreatedMessage();
+                        break;
+                    }
+                case MessageType.CreateDialogResponceMessage:
+                    {
+                        message = new CreateDialogResponceMessage();
                         break;
                     }
                 default:

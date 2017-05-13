@@ -39,7 +39,7 @@ namespace EncryptMessanger.dll.Encription
             //aes.BlockSize = 256;
             //aes.KeySize = 256;
             aes.Mode = CipherMode.CBC;
-
+            //aes.Padding = PaddingMode.None;
             SKeyMessage sMessage = message as SKeyMessage;
             aes.IV = decryptRsa.Decrypt(sMessage.IV, true);
             //Debug.WriteLine(Encoding.UTF8.GetString(aes.IV));
@@ -71,6 +71,7 @@ namespace EncryptMessanger.dll.Encription
             //aes.KeySize = 256;
 
             aes.Mode = CipherMode.CBC;
+            //aes.Padding = PaddingMode.None;
 
             //Debug.WriteLine(Encoding.UTF8.GetString(aes.IV));
             //Debug.WriteLine(Encoding.UTF8.GetString(aes.Key));

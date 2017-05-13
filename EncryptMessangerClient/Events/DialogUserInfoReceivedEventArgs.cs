@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessanger.dll.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace EncryptMessangerClient.Events
     {
         private long _userId;
         private string _login;
+        private UserState _state;
 
         public long UserId
         {
@@ -37,14 +39,29 @@ namespace EncryptMessangerClient.Events
             }
         }
 
+        public UserState State
+        {
+            get
+            {
+                return _state;
+            }
+
+            set
+            {
+                _state = value;
+            }
+        }
+
         public DialogUserInfoReceivedEventArgs()
         {
 
         }
-        public DialogUserInfoReceivedEventArgs(long id, string login)
+        public DialogUserInfoReceivedEventArgs(long id, string login, UserState state)
         {
             UserId = id;
             Login = login;
+            State = state;
+
         }
     }
 }

@@ -19,6 +19,8 @@ using EncryptMessangerClient.Model;
 using EncryptMessanger.dll.SendibleData;
 using EncryptMessanger.dll.FileTransfer;
 using System.Net.NetworkInformation;
+using EncryptMessanger.dll.Messages.UserSearch;
+using EncryptMessanger.dll.Messages.DialogCreation;
 
 namespace EncryptMessangerClient
 {
@@ -52,6 +54,7 @@ namespace EncryptMessangerClient
         public EventHandler<DialogSessionSuccessEventArgs> DialogSessionSuccess;
         public EventHandler<MessagesReceivedEventArgs> MessagesInfoReceived;
         public EventHandler<DialogSessionSuccessEventArgs> SessionUpdated;
+        public EventHandler<DialogUserInfoReceivedEventArgs> UserFind;
         //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
 
         //private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
@@ -74,19 +77,6 @@ namespace EncryptMessangerClient
             _serverIP = GetServerIp();
 
             ConnectToServer();
-
-            _messageWriter = new MessageWriter(_client.GetStream());
-            _messageWriter.WriteMessage(new StartStreamMessage("123"));
-            _messageReder = new MessageReader(_client.GetStream());
-            EncryptMessanger.dll.Messages.Message newMessage = _messageReder.ReadNext();
-            while (newMessage.Type != MessageType.StartStreamMessage)
-            {
-
-            }
-            EncryptionProvider encryptionProvider = new EncryptionProvider();
-            encryptionProvider.ClientServerEncrypt(_messageWriter, _messageReder);
-
-
         }
         private void SessionAddOrReplase(ClientClientEncryptedSession session)
         {
@@ -110,13 +100,13 @@ namespace EncryptMessangerClient
                         case MessageType.ClientOnlineMessage:
                             {
                                 ClientOnlineMessage clientOnline = newMessage as ClientOnlineMessage;
-                                ClientOnline?.Invoke(this, new ClientStatusOnlineEventArgs(clientOnline.Users));
+                                ClientOnline?.Invoke(this, new ClientStatusOnlineEventArgs(clientOnline.ClientId));
                                 break;
                             }
                         case MessageType.ClientExitMessage:
                             {
                                 ClientExitMessage clientExit = newMessage as ClientExitMessage;
-                                ClientExit?.Invoke(this, new ClientStatusExitEventArgs(clientExit.User));
+                                ClientExit?.Invoke(this, new ClientStatusExitEventArgs(clientExit.UserId));
                                 break;
                             }
                         case MessageType.CreateCryptoSessionRequest:
@@ -163,7 +153,7 @@ namespace EncryptMessangerClient
                                     throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
                                     
                                 }
-                                OnResiveMessages(Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
+                                OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
                                 //Debug.WriteLine("Send message signature: "+Encoding.UTF8.GetString(newTextMessage.GetSignature()));
                                 //Debug.WriteLine("Send message text: " + Encoding.UTF8.GetString(newTextMessage.byteText));
                                 //if(session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature()))
@@ -194,7 +184,7 @@ namespace EncryptMessangerClient
                             {
                                 UserInfoResponceMessage userInfoResponce = newMessage as UserInfoResponceMessage;
 
-                                UserInfoReceived?.Invoke(this, new DialogUserInfoReceivedEventArgs(userInfoResponce.UserId, userInfoResponce.Login));
+                                UserInfoReceived?.Invoke(this, new DialogUserInfoReceivedEventArgs(userInfoResponce.UserId, userInfoResponce.Login, userInfoResponce.State));
                                 break;
                             }
                         case MessageType.DialogMessagesResponceMessage:
@@ -216,16 +206,34 @@ namespace EncryptMessangerClient
                                         //Debug.WriteLine("Load message text: " + Encoding.UTF8.GetString(info.Text));
                                         if (!info.HasAttach)
                                         {
-                                            args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
+                                            args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
                                         }
                                         else
                                         {
-                                            args.AddMessage(info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId);
+                                            args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId);
                                         }
                                     }
                                     MessagesInfoReceived?.Invoke(this, args);
                                     
                                 }
+                                break;
+                            }
+                        case MessageType.SearchUserResponceMessage:
+                            {
+                                SearchUserResponceMessage responce = newMessage as SearchUserResponceMessage;
+                                UserFind?.Invoke(this, new DialogUserInfoReceivedEventArgs(responce.UserId, responce.Login, responce.State));
+                                break;
+                            }
+                        case MessageType.DialogCreatedMessage:
+                            {
+                                DialogCreatedMessage dialogCreatedMessage = newMessage as DialogCreatedMessage;
+                                DilogsReceived?.Invoke(this, new DialogsReceivedEventArgs(new List<DialogSendibleInfo>() { dialogCreatedMessage.Info}));
+                                break;
+                            }
+                        case MessageType.CreateDialogResponceMessage:
+                            {
+                                CreateDialogResponceMessage responce = newMessage as CreateDialogResponceMessage;
+                                UpdateDialogEncryptionKeys(responce.DialogId, _currentUserId);
                                 break;
                             }
                         case MessageType.EndStreamMessage:
@@ -247,11 +255,21 @@ namespace EncryptMessangerClient
         public void ConnectToServer()
         {
             _client.Connect(_serverIP, _serverPort);
+            _messageWriter = new MessageWriter(_client.GetStream());
+            _messageWriter.WriteMessage(new StartStreamMessage("123"));
+            _messageReder = new MessageReader(_client.GetStream());
+            EncryptMessanger.dll.Messages.Message newMessage = _messageReder.ReadNext();
+            while (newMessage.Type != MessageType.StartStreamMessage)
+            {
+
+            }
+            EncryptionProvider encryptionProvider = new EncryptionProvider();
+            encryptionProvider.ClientServerEncrypt(_messageWriter, _messageReder);
         }
-        private void OnResiveMessages(string message, long dialogId, long from, DateTime sendDate, bool isAltered)
+        private void OnResiveMessages(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered)
         {
 
-            Resive?.Invoke(this, new NewMessageEventArgs(message, dialogId, from, sendDate, isAltered));
+            Resive?.Invoke(this, new NewMessageEventArgs(messageId, message, dialogId, from, sendDate, isAltered));
         }
         public void SendMessage(string message, long dialogId)
         {
@@ -430,7 +448,7 @@ namespace EncryptMessangerClient
             }
         }
         public void ImportKeys(long dialogId, string fileName)
-        {
+        { 
             ClientClientEncryptedSession session = FindSession(dialogId);
             if (session == null)
             {
@@ -521,6 +539,14 @@ namespace EncryptMessangerClient
             ClientClientEncryptedSession session = FindSession(dialogId);
             receiver.ReceiveFileForClientAsync(saveFileName, point, session);
             _messageWriter.WriteMessage(new ReceiveFileRequest(attachId, clientAdress.GetAddressBytes(), point.Port));
+        }
+        public void SearchForUser(string login, int offcet, int count)
+        {
+            _messageWriter.WriteMessage(new SearchUserRequestMessage(login, offcet, count));
+        }
+        public void CreateDialog(long creatorId, long[] membersId, string dialogName)
+        {
+            _messageWriter.WriteMessage(new CreateDialogRequestMessage(creatorId, membersId, dialogName));
         }
         public void Stop()
         {

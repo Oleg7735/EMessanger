@@ -8,6 +8,7 @@ namespace EncryptMessangerClient
 {
     public class NewMessageEventArgs : EventArgs
     {
+        private long _messageId;
         private string _message;
         private long _from;
         private long _dialogId;
@@ -52,12 +53,26 @@ namespace EncryptMessangerClient
             }
         }
 
-        public NewMessageEventArgs(string message, long dialogId, long from, DateTime sendDate, bool isAltered)
+        public long MessageId
+        {
+            get
+            {
+                return _messageId;
+            }
+
+            set
+            {
+                _messageId = value;
+            }
+        }
+
+        public NewMessageEventArgs(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered)
         {
             _message = message;
             _from = from;
             _isAltered = isAltered;
             _dialogId = dialogId;
+            MessageId = messageId;
             SendDate = sendDate;
         }
 

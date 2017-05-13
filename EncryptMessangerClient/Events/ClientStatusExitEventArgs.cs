@@ -8,14 +8,14 @@ namespace EncryptMessangerClient.Events
 {
     public class ClientStatusExitEventArgs
     {
-        private string _login;
-        public string Login
+        private long _id;
+        public long Id
         {
-            get { return _login; }
+            get { return _id; }
         }
-        public ClientStatusExitEventArgs(string login)
+        public ClientStatusExitEventArgs(long id)
         {
-            _login = login;
+            _id = id;
         }
     }
 }

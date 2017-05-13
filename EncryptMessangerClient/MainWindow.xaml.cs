@@ -17,6 +17,7 @@ using System.Net.Sockets;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
+using EncryptMessangerClient.ViewModel;
 
 namespace EncryptMessangerClient
 {
@@ -27,11 +28,16 @@ namespace EncryptMessangerClient
     {
         public MainWindow()
         {
+
             InitializeComponent();
+            MainViewModel vm = DataContext as MainViewModel;
+            vm.ScrollMessages += OnScrollMessagesToEnd;
+            
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
         {
+           
            // IPHostEntry ipHost = Dns.GetHostEntry("localhost");
            // IPAddress ipAddr = ipHost.AddressList[0];
            // IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000);
@@ -87,6 +93,42 @@ namespace EncryptMessangerClient
            // textBox.Text = Encoding.UTF8.GetString(msg, 0, n);
            // xsender.Shutdown(SocketShutdown.Both);
            // xsender.Close();*/
+        }
+        private void OnScrollMessagesToEnd(object sender, EventArgs args)
+        {
+            Decorator border = VisualTreeHelper.GetChild(messagesListBox, 0) as Decorator;
+            if (border != null)
+            {
+                // Get scrollviewer
+                ScrollViewer scrollViewer = border.Child as ScrollViewer;
+                if (scrollViewer != null)
+                {
+                    //// center the Scroll Viewer...
+                    //double center = scrollViewer.ScrollableHeight / 2.0;
+                    //scrollViewer.ScrollToVerticalOffset(center);
+                    scrollViewer.ScrollToEnd();
+                    
+                }
+            }
+        }
+        private void dialogListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            MainViewModel vm = DataContext as MainViewModel;            
+            Decorator border = VisualTreeHelper.GetChild(messagesListBox, 0) as Decorator;
+            if (border != null)
+            {
+                // Get scrollviewer
+                ScrollViewer scrollViewer = border.Child as ScrollViewer;
+                if (scrollViewer != null)
+                {
+                    scrollViewer.ScrollChanged += vm.OnMessagesScroll;
+                }
+            }
         }
     }
 }

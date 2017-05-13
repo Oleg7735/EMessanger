@@ -8,14 +8,14 @@ namespace EncryptMessangerClient.Events
 {
     public class ClientStatusOnlineEventArgs
     {
-        private string[] _logins;
-        public string[] Logins
+        private long _id;
+        public long Id
         {
-            get { return _logins; }
+            get { return _id; }
         }
-        public ClientStatusOnlineEventArgs(string[] logins)
+        public ClientStatusOnlineEventArgs(long id)
         {
-            _logins = logins;
+            _id = id;
         }
     }
 }

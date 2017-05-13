@@ -11,7 +11,7 @@ namespace EncryptMessangerClient.Model
     class DialogMessage : INotifyPropertyChanged, IEquatable<DialogMessage>
     {
         private string _alteredMessage = "Сообщение было изменено!";
-
+        private long _messageId;
         private UserInfo _author;
         private string _text;
         private bool _isAltered;
@@ -112,13 +112,14 @@ namespace EncryptMessangerClient.Model
         //    //}
         //}
 
-        public DialogMessage(UserInfo author, string text, DateTime sendDate, bool isAltered, CommandWithParametr loadFileCommand)
+        public DialogMessage(UserInfo author, long messageId, string text, DateTime sendDate, bool isAltered, CommandWithParametr loadFileCommand)
         {
             _isAltered = isAltered;
             _text = text;
             _author = author;
             _sendDate = sendDate;
             _loadFileCommand = loadFileCommand;
+            _messageId = messageId;
         }
         //public DialogMessage( string text, bool isAltered, DateTime sendDate)
         //{
@@ -136,7 +137,7 @@ namespace EncryptMessangerClient.Model
         //}
         public bool Equals(DialogMessage other)
         {
-            return other.AuthorInfo.Id == this.AuthorInfo.Id && other.Text.Equals(this.Text) && (other._isAltered == _isAltered);
+            return this._messageId == other.MessageId; //other.AuthorInfo.Id == this.AuthorInfo.Id && other.Text.Equals(this.Text) && (other._isAltered == _isAltered);
         }
         public void AddAttachment(long attachmentId)
         {
@@ -191,6 +192,19 @@ namespace EncryptMessangerClient.Model
                     _loadFileCommand = value;
                 }
                 
+            }
+        }
+
+        public long MessageId
+        {
+            get
+            {
+                return _messageId;
+            }
+
+            set
+            {
+                _messageId = value;
             }
         }
         //private void Load(object param)

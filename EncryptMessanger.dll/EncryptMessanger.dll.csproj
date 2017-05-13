@@ -68,6 +68,7 @@
     <Compile Include="Encription\EncryptionProvider.cs" />
     <Compile Include="Encription\SessionIO.cs" />
     <Compile Include="Encription\UserVerificationData.cs" />
+    <Compile Include="Enums\Enums.cs" />
     <Compile Include="FileTransfer\FileReceiver.cs" />
     <Compile Include="FileTransfer\FileSender.cs" />
     <Compile Include="MessageAtribute.cs" />
@@ -85,6 +86,9 @@
     <Compile Include="Messages\CreateCryptoSessionRequest.cs" />
     <Compile Include="Messages\CreateCryptoSessionResponse.cs" />
     <Compile Include="Messages\DeleteMessagesRequestMessage.cs" />
+    <Compile Include="Messages\DialogCreation\CreateDialogRequestMessage.cs" />
+    <Compile Include="Messages\DialogCreation\CreateDialogResponceMessage.cs" />
+    <Compile Include="Messages\DialogCreation\DialogCreatedMessage.cs" />
     <Compile Include="Messages\DialogEncryptionSettingsMessage.cs" />
     <Compile Include="Messages\DialogMessagesRequestMessage.cs" />
     <Compile Include="Messages\DialogMessagesResponceMessage.cs" />
@@ -106,6 +110,8 @@
     <Compile Include="Messages\TextMessage.cs" />
     <Compile Include="Messages\UserInfoRequest.cs" />
     <Compile Include="Messages\UserInfoResponceMessage.cs" />
+    <Compile Include="Messages\UserSearch\SearchUserRequestMessage.cs" />
+    <Compile Include="Messages\UserSearch\SearchUserResponceMessage.cs" />
     <Compile Include="MessageWriter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">

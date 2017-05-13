@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessanger.dll.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,11 +17,12 @@ namespace EncryptMessanger.dll.Messages
         {
             Init();
         }
-        public UserInfoResponceMessage(long userId, string login)
+        public UserInfoResponceMessage(long userId, string login, UserState state)
         {
             Init();
             AddAtribute(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
             AddAtribute(new MessageAtribute(Atribute.Login, Encoding.UTF8.GetBytes(login)));
+            State = state;
         }
         public long UserId
         {
@@ -34,6 +36,17 @@ namespace EncryptMessanger.dll.Messages
             get
             {
                 return Encoding.UTF8.GetString(GetAttribute(Atribute.Login));
+            }
+        }
+        public UserState State
+        {
+            get
+            {
+                return (UserState)Enum.ToObject(typeof(UserState), BitConverter.ToInt32(GetAttribute(Atribute.UserState), 0)); 
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.UserState, BitConverter.GetBytes((int)value)));
             }
         }
     }

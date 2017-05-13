@@ -26,6 +26,7 @@ namespace EncryptMessangerClient
         public Client CurrentClient { get { return _client; } }
         private AuthWindow _logInForm;
         private EncryptionSettings _encrytionSettingsForm;
+        private DialogCreationForm _dialogCreationForm;
         private RegistrationForm _registrationWindow;
         private RegistrationViewModel _registrationViewModel;
         private MsgBoxService _messageService = new MsgBoxService();
@@ -34,7 +35,17 @@ namespace EncryptMessangerClient
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
-            _client = new EncryptMessangerClient.Client();
+            //обрабатываем взможную ошибку подключения
+            try
+            {
+                _client = new EncryptMessangerClient.Client();
+            }
+            catch(System.Net.Sockets.SocketException)
+            {
+                MessageBox.Show("Не удается подключится к серверу!", "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Shutdown();
+                return;
+            }
             _client.AuthError = OnClientAuthError;
             _client.ClientOnline = OnClientOnline;
             _client.ClientExit = OnClientExit;
@@ -54,6 +65,8 @@ namespace EncryptMessangerClient
             vm.ExportKeysEventHandler += OnExportKeys;
             vm.ImportKeysEventHandler += OnImportKeys;
             vm.EditEncryptionSettings += OnEditEncryptionSettings;
+            vm.CanselDialogCreationHandler += OnCanselDialogCreation;
+            vm.StartDialogCreationHandler += OnStartDialogCreation;
             vm.EncryptionSettingsChanged += OnEncryptionSettingChangedByUser;
             vm.DialogsRequest += OnDialogsRequest;
             vm.LoadDialogUserInfo += OnUserInfoRequest;
@@ -63,11 +76,14 @@ namespace EncryptMessangerClient
             vm.FileSend += OnSendFile;
             vm.FileLoad += OnLoadFile;
             vm.DeleteProgress += DeleteFileSendProgress;
+            vm.SearchUserHandler += OnUserSearch;
+            vm.CreateDialogHandler += OnCreateDialog;
             mainWindow.Closed += MainWindow_Closed;
 
             _client.DialogSessionFaild += vm.OnDialogSessionFaild;
             _client.DialogSessionSuccess += vm.OnDialogSessionSuccess;
             _client.SessionUpdated += OnSessionUpdated;
+            _client.UserFind += OnUserFind;
             //mainWindow.Closed += vm.ClientStopCommand;
             this.MainWindow = mainWindow;
             //mainWindow.Show();
@@ -79,6 +95,10 @@ namespace EncryptMessangerClient
             _encrytionSettingsForm = new EncryptionSettings();
             _encrytionSettingsForm.Closing += OnEncryptionSettingsFormClosed;
             _encrytionSettingsForm.DataContext = vm;
+
+            _dialogCreationForm = new DialogCreationForm();
+            _dialogCreationForm.Closing += OnDialogCreationFormClosed;
+            _dialogCreationForm.DataContext = vm;
             //EncryptionSettingsViewModel evm = _encrytionSettingsForm.DataContext as EncryptionSettingsViewModel;
             //evm.EncryptSettingChanged += OnEncryptSettingChanged;
             //evm.SignSettingChanged += OnSignSettingChanged;
@@ -110,7 +130,7 @@ namespace EncryptMessangerClient
                     //vm.MessageBox = e.Message;
 
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
-                    vm.AddMessage(e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered);
+                    vm.AddMessage(e.MessageId, e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered);
                 });
             }
         }
@@ -224,7 +244,15 @@ namespace EncryptMessangerClient
                 }
             }*/
             //throw new Exception("No implementation of App.Xml.OnClientOnline");
-
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+            });
+            if (vm != null)
+            {
+                vm.ClientOnline(client.Id);
+            }
         }
         private void DeleteFileSendProgress(object sender, DeleteProgressEventArgs args)
         {
@@ -255,11 +283,29 @@ namespace EncryptMessangerClient
                 });                
             }*/
             //throw new Exception("No implementation of App.Xml.OnClientExit");
-
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+            });
+            if (vm != null)
+            {
+                Dispatcher.Invoke(() => {
+                    vm.ClientExit(client.Id);
+                });
+            }
         }
         private void OnEditEncryptionSettings(object sender, EventArgs e)
         {
             _encrytionSettingsForm.Show();
+        }
+        private void OnStartDialogCreation(object sender, EventArgs e)
+        {
+            _dialogCreationForm.Show();
+        }
+        private void OnCanselDialogCreation(object sender, EventArgs e)
+        {
+            _dialogCreationForm.Hide();
         }
         private void OnExportKeys(object sender, ExportKeysEventArgs exportArgs)
         {
@@ -290,6 +336,11 @@ namespace EncryptMessangerClient
         {
             e.Cancel = true;
             _encrytionSettingsForm.Hide();
+        }
+        private void OnDialogCreationFormClosed(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true;
+            _dialogCreationForm.Hide();
         }
         private EncryptionSettingsEventArgs GetDialogSettingsFromVm(string login)
         {
@@ -408,7 +459,7 @@ namespace EncryptMessangerClient
             {
                 Dispatcher.Invoke(() =>
                 {
-                    vm.AddContact(new UserInfo(args.UserId, args.Login));
+                    vm.AddContact(new UserInfo(args.UserId, args.Login, args.State));
                 });
             }
         }
@@ -445,6 +496,25 @@ namespace EncryptMessangerClient
         private void OnLoadFile(object sender, LoadFileEventArgs args)
         {
             _client.ReceiveFile(args.DialogId, args.AttachmentId, args.FileName);
+        }
+
+        private void OnUserSearch(object sender, SearchUserEventArgs args)
+        {
+            _client.SearchForUser(args.UserLogin, args.Offset, args.Count);
+        }
+        private void OnUserFind(object sender, DialogUserInfoReceivedEventArgs args)
+        {
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+                vm.AddWantedUser(args.UserId, args.Login, args.State);
+            });
+                
+        }
+        private void OnCreateDialog(object sender, CreateDialogEventArgs args)
+        {
+            _client.CreateDialog(args.CreatorId, args.MembersId, args.DialogName);
         }
         //    private void OnEncryptSettingChanged(object sender, EncryptionSettingsEventArgs e)
         //    {

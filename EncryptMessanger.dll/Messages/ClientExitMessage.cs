@@ -12,14 +12,14 @@ namespace EncryptMessanger.dll.Messages
         {
             _type = MessageType.ClientExitMessage;
         }
-        public ClientExitMessage(string userLogin)
+        public ClientExitMessage(long userId)
         {
             _type = MessageType.ClientExitMessage;
-            _atributes.Add(new MessageAtribute(Atribute.Clients, Encoding.UTF8.GetBytes(userLogin)));
+            _atributes.Add(new MessageAtribute(Atribute.UserId, BitConverter.GetBytes(userId)));
         }
-        public string User
+        public long UserId
         {
-            get { return Encoding.UTF8.GetString(GetAttribute(Atribute.Clients)); }
+            get { return BitConverter.ToInt64(GetAttribute(Atribute.UserId), 0); }
         }
 
 

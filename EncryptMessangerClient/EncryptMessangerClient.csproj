@@ -77,6 +77,9 @@
     </Compile>
     <Compile Include="Commands\CommandWithParametr.cs" />
     <Compile Include="Commands\LoadFileCommandParams.cs" />
+    <Compile Include="DialogCreationForm.xaml.cs">
+      <DependentUpon>DialogCreationForm.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EncryptedSessionManager.cs" />
     <Compile Include="EncryptionSettings.xaml.cs">
       <DependentUpon>EncryptionSettings.xaml</DependentUpon>
@@ -87,6 +90,7 @@
     <Compile Include="Events\ClientRegistrationEventArgs.cs" />
     <Compile Include="Events\ClientStatusExitEventArgs.cs" />
     <Compile Include="Events\ClientStatusOnlineEventArgs.cs" />
+    <Compile Include="Events\CreateDialogEventArgs.cs" />
     <Compile Include="Events\DeleteProgressEventArgs.cs" />
     <Compile Include="Events\DialogSessionSuccessEventArgs.cs" />
     <Compile Include="Events\DialogsReceivedEventArgs.cs" />
@@ -105,6 +109,7 @@
     <Compile Include="Events\NewMessageEventArgs.cs" />
     <Compile Include="Events\RegistrationErrorEventArgs.cs" />
     <Compile Include="Events\RegistrationSuccessEventArgs.cs" />
+    <Compile Include="Events\SearchUserEventArgs.cs" />
     <Compile Include="Events\SendFileEventArgs.cs" />
     <Compile Include="Events\UpdateDialogEncryptionKeysEventArgs.cs" />
     <Compile Include="extensions\DialogsObservableCollectionExtension.cs" />
@@ -126,6 +131,10 @@
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\RegistrationViewModel.cs" />
     <Page Include="AuthWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DialogCreationForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
