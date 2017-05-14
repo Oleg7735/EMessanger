@@ -91,12 +91,14 @@
     <Compile Include="Events\ClientStatusExitEventArgs.cs" />
     <Compile Include="Events\ClientStatusOnlineEventArgs.cs" />
     <Compile Include="Events\CreateDialogEventArgs.cs" />
+    <Compile Include="Events\DeleteMessageEventArgs.cs" />
     <Compile Include="Events\DeleteProgressEventArgs.cs" />
     <Compile Include="Events\DialogSessionSuccessEventArgs.cs" />
     <Compile Include="Events\DialogsReceivedEventArgs.cs" />
     <Compile Include="Events\DialogsRequestEventArgs.cs" />
     <Compile Include="Events\DialogUserInfoReceivedEventArgs.cs" />
     <Compile Include="Events\EncryptionSettingsEventArgs.cs" />
+    <Compile Include="Events\ErrorMessageEventArgs.cs" />
     <Compile Include="Events\ExportKeysEventArgs.cs" />
     <Compile Include="Events\ImportKeysEventArgs.cs" />
     <Compile Include="Events\LoadDialogMessagesEventArgs.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="Events\LoadDialogSessionFaildEventArgs.cs" />
     <Compile Include="Events\LoadDialogUserInfoEventArgs.cs" />
     <Compile Include="Events\LoadFileEventArgs.cs" />
+    <Compile Include="Events\MessageDeletedEventArgs.cs" />
     <Compile Include="Events\MessageSendEventArgs.cs" />
     <Compile Include="Events\MessagesReceivedEventArgs.cs" />
     <Compile Include="Events\NewMessageEventArgs.cs" />

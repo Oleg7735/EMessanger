@@ -1,5 +1,6 @@
 ﻿using EncryptMessanger.dll.Messages.DialogCreation;
 using EncryptMessanger.dll.Messages.FileMessages;
+using EncryptMessanger.dll.Messages.SingleMessageDeletion;
 using EncryptMessanger.dll.Messages.UserSearch;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,8 @@ public enum MessageType
     DialogsRequestMessage, DialogResponceMessage, UserInfoRequestMessage, UserInfoResponceMessage, 
     DialogMessagesResponceMessage, DialogMessagesRequestMessage, FileFragmentMessage, EndFileMessage,
     SendFileRequest, ReceiveFileRequest, DeleteMessagesRequestMessage, UserSearchRequestMessage,
-    SearchUserResponceMessage, CreateDialogRequestMessage, DialogCreatedMessage, CreateDialogResponceMessage
+    SearchUserResponceMessage, CreateDialogRequestMessage, DialogCreatedMessage, CreateDialogResponceMessage,
+    DeleteSingleMessageRequest, MessageDeletedMessage
 
 };
 public enum Atribute
@@ -379,6 +381,16 @@ namespace EncryptMessanger.dll.Messages
                 case MessageType.CreateDialogResponceMessage:
                     {
                         message = new CreateDialogResponceMessage();
+                        break;
+                    }
+                case MessageType.DeleteSingleMessageRequest:
+                    {
+                        message = new DeleteMessageRequest();
+                        break;
+                    }
+                case MessageType.MessageDeletedMessage:
+                    {
+                        message = new MessageDeletedMessage();
                         break;
                     }
                 default:

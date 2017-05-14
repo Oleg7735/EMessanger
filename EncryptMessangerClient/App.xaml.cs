@@ -78,12 +78,15 @@ namespace EncryptMessangerClient
             vm.DeleteProgress += DeleteFileSendProgress;
             vm.SearchUserHandler += OnUserSearch;
             vm.CreateDialogHandler += OnCreateDialog;
+            vm.DeleteMessageHandler += OnDeleteMessage;
             mainWindow.Closed += MainWindow_Closed;
 
             _client.DialogSessionFaild += vm.OnDialogSessionFaild;
             _client.DialogSessionSuccess += vm.OnDialogSessionSuccess;
             _client.SessionUpdated += OnSessionUpdated;
             _client.UserFind += OnUserFind;
+            _client.SendError += OnClientErrorMessage;
+            _client.MessageDeleted += OnMessageDeleted;
             //mainWindow.Closed += vm.ClientStopCommand;
             this.MainWindow = mainWindow;
             //mainWindow.Show();
@@ -112,7 +115,15 @@ namespace EncryptMessangerClient
             _logInForm.Show();
 
         }
-        
+        private void OnClientErrorMessage(object sender, ErrorMessageEventArgs args)
+        {
+            MainViewModel vm;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+                vm.ShowError(args.Error);
+            });
+        }
         private void Client_NewMessage(object sender, NewMessageEventArgs e)
         {
             MainViewModel vm = null;
@@ -130,13 +141,34 @@ namespace EncryptMessangerClient
                     //vm.MessageBox = e.Message;
 
                     //vm.Messages.Add(new DialogMessage(e.Interlocutor, e.Message, e.IsAltered));
-                    vm.AddMessage(e.MessageId, e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered);
+                    if (e.HasAttach)
+                    {
+                        vm.AddAttachMessage(e.MessageId, e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered, e.AttachId, e.Error);
+                    }
+                    else
+                    {
+                        vm.AddMessage(e.MessageId, e.Interlocutor, e.DialogId, e.SendDate, e.Message, e.IsAltered, e.Error);
+                    }
+
                 });
             }
         }
         private void SendMessage(object sender, MessageSendEventArgs e)
         {
             CurrentClient.SendMessage(e.Message, e.DialogId);
+        }
+        private void OnDeleteMessage(object sender, DeleteMessageEventArgs args)
+        {
+            _client.DeleteMessage(args.MessageId);
+        }
+        private void OnMessageDeleted(object sender, MessageDeletedEventArgs args)
+        {
+            MainViewModel vm = null;
+            Dispatcher.Invoke(() =>
+            {
+                vm = MainWindow.DataContext as MainViewModel;
+                vm.DeleteMessage(args.MessageId);
+            });
         }
         private void OnClientStop(object sender, EventArgs e)
         {

@@ -16,6 +16,8 @@ namespace EncryptMessangerClient.Model
         private string _text;
         private bool _isAltered;
         private DateTime _sendDate;
+        private string _error = "";
+        private bool _hasError = false;
 
         private long _attachId;
         private bool _hasAttach = false;
@@ -205,6 +207,40 @@ namespace EncryptMessangerClient.Model
             set
             {
                 _messageId = value;
+            }
+        }
+
+        public string Error
+        {
+            get
+            {
+                return _error;
+            }
+
+            private set
+            {
+                _error = value;
+            }
+        }
+        public void SetError(string errorMessage)
+        {
+            _error = errorMessage;
+            _hasError = true;
+        }
+        public System.Windows.Visibility ErrorVisibility
+        {
+            get
+            {
+                
+                if (_hasError)
+                {
+                    return System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    return System.Windows.Visibility.Collapsed;
+                }
+                
             }
         }
         //private void Load(object param)

@@ -31,6 +31,7 @@ namespace EncryptMessangerClient.ViewModel
         private int _findUserSelectedIndex = -1;
         private string _userNameToSearch;
         private string _createDialogName;
+        private int _selectedMessageIndex = -1;
 
         //private List<Attachment> _newMessageAttachments = new List<Attachment>();
         //private string _currentUserLogin;
@@ -162,7 +163,7 @@ namespace EncryptMessangerClient.ViewModel
                 ScrollMessages?.Invoke(this, EventArgs.Empty);
             }
         }
-        public void AddMessage(long messageId, long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered)
+        public void AddMessage(long messageId, long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered, string error = "")
         {
             //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
             if(CurrentDialog == null)
@@ -175,22 +176,67 @@ namespace EncryptMessangerClient.ViewModel
                 return;
             }
             UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
+            DialogMessage message;
             try
             {
                 Dialog containerDialog = _dialogs.GetById(dialog);
-            
-            if (authorInfo == null)
-            {
-                //RequestUserInfo(interlocutor);
-                
-                containerDialog.DialogMessages.Add(new DialogMessage(new UserInfo(interlocutor), messageId, text, sendDate, isAltered, LoadFileCommand));
-                
+                if (authorInfo == null)
+                {
+                    //RequestUserInfo(interlocutor);
+                    message = new DialogMessage(new UserInfo(interlocutor), messageId, text, sendDate, isAltered, LoadFileCommand);
+                    //containerDialog.DialogMessages.Add();
+                }
+                else
+                {
+                    message = new DialogMessage(authorInfo, messageId, text, sendDate, isAltered, LoadFileCommand);
+                    //containerDialog.DialogMessages.Add();
+                }
+                if(!String.IsNullOrEmpty(error))
+                {
+                    message.SetError(error);
+                }
+                containerDialog.DialogMessages.Add(message);
+                //OnPropertyChanged("Messages");
             }
-            else
+            catch (ArgumentException)
             {
-                containerDialog.DialogMessages.Add(new DialogMessage(authorInfo, messageId, text, sendDate, isAltered, LoadFileCommand));
-                
+
             }
+        }
+        public void AddAttachMessage(long messageId, long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered, long attachId, string error = "")
+        {
+            //int i =_dialogs.IndexOf(new Model.Dialog(interlocutor));
+            if (CurrentDialog == null)
+            {
+                return;
+            }
+            //выводим принятые сообщения только для выделенного диалога, для остальных все равно подгрузка при выделении
+            if (dialog != CurrentDialog.DialogId)
+            {
+                return;
+            }
+            UserInfo authorInfo = _contacts.Find(x => x.Id == interlocutor);
+            DialogMessage message;
+            try
+            {
+                Dialog containerDialog = _dialogs.GetById(dialog);
+                if (authorInfo == null)
+                {
+                    //RequestUserInfo(interlocutor);
+                    message = new DialogMessage(new UserInfo(interlocutor), messageId, text, sendDate, isAltered, LoadFileCommand);
+                    //containerDialog.DialogMessages.Add();
+                }
+                else
+                {
+                    message = new DialogMessage(authorInfo, messageId, text, sendDate, isAltered, LoadFileCommand);
+                    //containerDialog.DialogMessages.Add();
+                }
+                if (!String.IsNullOrEmpty(error))
+                {
+                    message.SetError(error);
+                }
+                message.AddAttachment(attachId);
+                containerDialog.DialogMessages.Add(message);
                 //OnPropertyChanged("Messages");
             }
             catch (ArgumentException)
@@ -239,6 +285,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<SearchUserEventArgs> SearchUserHandler;
         public event EventHandler ScrollMessages;
         public event EventHandler<CreateDialogEventArgs> CreateDialogHandler;
+        public event EventHandler<DeleteMessageEventArgs> DeleteMessageHandler;
 
         public Command MessageSendCommand { get; private set; }
         public Command MessageUpdateKaysCommand { get; private set; }
@@ -253,6 +300,7 @@ namespace EncryptMessangerClient.ViewModel
         public Command CreateDialogCommand { get; private set; }
         public Command CanselDialogCreationCommand { get; private set; }
         public Command OpenDialogCreationCommand { get; private set; }
+        public Command DeleteMessageCommand { get; private set; }
 
         public string MessageBox
         {
@@ -456,6 +504,7 @@ namespace EncryptMessangerClient.ViewModel
             OpenDialogCreationCommand = new Command(OpenDialogCreation, CanOpenDialogCreation);
             SearchUserCommand = new Command(SearchUser, CanSearchUser);
             CreateDialogCommand = new Command(CreateDialog, CanCreateDialog);
+            DeleteMessageCommand = new Command(DeleteMessage, CanDeleteMessage);
 
             _currentUser = new UserInfo();
             //FileSendProgresses.Add(new FileSendProgress("file1", new DeleteProgressDelegate(DeleteFileSendProgress)));
@@ -657,6 +706,31 @@ namespace EncryptMessangerClient.ViewModel
             }
         }
 
+        public int SelectedMessageIndex
+        {
+            get
+            {
+                return _selectedMessageIndex;
+            }
+
+            set
+            {
+                if (_selectedMessageIndex != value)
+                {
+                    if (value <= -1)
+                    {
+                        _selectedMessageIndex = -1;
+                    }
+                    else
+                    {
+                        _selectedMessageIndex = value;
+                    }
+                    OnPropertyChanged();
+                    DeleteMessageCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
         //public List<Attachment> NewMessageAttachments
         //{
         //    get
@@ -699,6 +773,14 @@ namespace EncryptMessangerClient.ViewModel
                 OnPropertyChanged("UsersFind");
             }
             //_contacts.Find(contact => contact.Id == clientId).State = UserState.Online;
+        }
+        public void DeleteMessage()
+        {
+            DeleteMessageHandler?.Invoke(this, new DeleteMessageEventArgs(Messages[_selectedMessageIndex].MessageId));
+        }
+        public bool CanDeleteMessage()
+        {
+            return _selectedMessageIndex >= 0 && Messages[_selectedMessageIndex].AuthorInfo.Id == CurrentUserId;
         }
         public void AddDialog(Dialog dialog)
         {
@@ -745,6 +827,24 @@ namespace EncryptMessangerClient.ViewModel
             _usersFind.Add(new UserInfo(userId, login, state));
             OnPropertyChanged("UsersFind");
         }
-        
+        public void DeleteMessage(long messageId)
+        {
+            //Dialog dialog = Dialogs.Where(d => d.DialogId == dialogId).FirstOrDefault();
+            for(int i = 0; i < Dialogs.Count; i++)
+            {
+                for(int j = 0; j < _dialogs[i].DialogMessages.Count; j++)
+                {
+                    if(_dialogs[i].DialogMessages[j].MessageId == messageId)
+                    {
+                        _dialogs[i].DialogMessages.Remove(_dialogs[i].DialogMessages[j]);
+                        return;
+                    }
+                }
+            }
+        }
+        //public void ShowError(string error)
+        //{
+        //    _messageService.ShowNotification(error);
+        //}
     }
 }

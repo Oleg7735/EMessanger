@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EncryptMessangerClient.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,9 @@ namespace EncryptMessangerClient
         private long _from;
         private long _dialogId;
         private DateTime _sendDate;
+        private string _error = "";
+        private bool _hasAttach = false;
+        private long _attachId;
         public string Message
         {
             get { return _message; }
@@ -66,7 +70,46 @@ namespace EncryptMessangerClient
             }
         }
 
-        public NewMessageEventArgs(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered)
+        public string Error
+        {
+            get
+            {
+                return _error;
+            }
+
+            set
+            {
+                _error = value;
+            }
+        }
+
+        public bool HasAttach
+        {
+            get
+            {
+                return _hasAttach;
+            }
+
+            set
+            {
+                _hasAttach = value;
+            }
+        }
+
+        public long AttachId
+        {
+            get
+            {
+                return _attachId;
+            }
+
+            set
+            {
+                _attachId = value;
+            }
+        }
+
+        public NewMessageEventArgs(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered, string error = "")
         {
             _message = message;
             _from = from;
@@ -74,7 +117,21 @@ namespace EncryptMessangerClient
             _dialogId = dialogId;
             MessageId = messageId;
             SendDate = sendDate;
+            Error = error;
         }
+        public NewMessageEventArgs(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered, long attachId, string error = "")
+        {
+            _message = message;
+            _from = from;
+            _isAltered = isAltered;
+            _dialogId = dialogId;
+            MessageId = messageId;
+            SendDate = sendDate;
+            HasAttach = true;
+            AttachId = attachId;
+            Error = error;
+        }
+        
 
     }
 }

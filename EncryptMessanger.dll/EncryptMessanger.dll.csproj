@@ -105,6 +105,8 @@
     <Compile Include="Messages\RegistrationErrorMessage.cs" />
     <Compile Include="Messages\RegistrationMessage.cs" />
     <Compile Include="Messages\ResendibleMessage.cs" />
+    <Compile Include="Messages\SingleMessageDeletion\DeleteMessageRequest.cs" />
+    <Compile Include="Messages\SingleMessageDeletion\MessageDeletedMessage.cs" />
     <Compile Include="Messages\SKeyMessage.cs" />
     <Compile Include="Messages\StartStreamMessage.cs" />
     <Compile Include="Messages\TextMessage.cs" />

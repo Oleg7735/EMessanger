@@ -21,6 +21,7 @@ using EncryptMessanger.dll.FileTransfer;
 using System.Net.NetworkInformation;
 using EncryptMessanger.dll.Messages.UserSearch;
 using EncryptMessanger.dll.Messages.DialogCreation;
+using EncryptMessanger.dll.Messages.SingleMessageDeletion;
 
 namespace EncryptMessangerClient
 {
@@ -55,6 +56,8 @@ namespace EncryptMessangerClient
         public EventHandler<MessagesReceivedEventArgs> MessagesInfoReceived;
         public EventHandler<DialogSessionSuccessEventArgs> SessionUpdated;
         public EventHandler<DialogUserInfoReceivedEventArgs> UserFind;
+        public EventHandler<ErrorMessageEventArgs> SendError;
+        public EventHandler<MessageDeletedEventArgs> MessageDeleted;
         //public EventHandler<EncryptionSettingsEventArgs> RegisteationSuccess;
 
         //private List<ClientClientEncryptedSession> _sessions = new List<ClientClientEncryptedSession>();
@@ -118,7 +121,21 @@ namespace EncryptMessangerClient
                         case MessageType.CreateCryptoSessionResponse:
                             {
                                 CreateCryptoSessionResponse response = newMessage as CreateCryptoSessionResponse;
-                                CreateSessionAsSender(response);
+                                if (response.Response)
+                                {
+                                    CreateSessionAsSender(response);
+                                }
+                                else
+                                {
+                                    if (!String.IsNullOrEmpty(response.Error))
+                                    {
+                                        SendError?.Invoke(this, new ErrorMessageEventArgs(response.Error));
+                                    }
+                                    else
+                                    {
+                                        SendError?.Invoke(this, new ErrorMessageEventArgs("Не удалось обновить ключи шифрования"));
+                                    }
+                                }
                                 break;
                             }
 
@@ -153,7 +170,34 @@ namespace EncryptMessangerClient
                                     throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
                                     
                                 }
-                                OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
+                                //OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
+                                string text;
+                                
+                                try
+                                {
+                                    text = Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText));
+                                    if (!newTextMessage.HasAttach)
+                                    {
+                                        OnResiveMessages(newTextMessage.MessageId, text, newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From));
+                                    }
+                                    else
+                                    {
+                                        OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, false, newTextMessage.AttachId);
+                                    }
+                                }
+                                catch (System.Security.Cryptography.CryptographicException)
+                                {
+                                    text = "";
+                                    if (!newTextMessage.HasAttach)
+                                    {
+                                        OnResiveMessages(newTextMessage.MessageId, text, newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From), "Не удалось расшифровать данное сообщение!");
+                                    }
+                                    else
+                                    {
+                                        OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, false, newTextMessage.AttachId);
+                                    }
+                                }
+                                
                                 //Debug.WriteLine("Send message signature: "+Encoding.UTF8.GetString(newTextMessage.GetSignature()));
                                 //Debug.WriteLine("Send message text: " + Encoding.UTF8.GetString(newTextMessage.byteText));
                                 //if(session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature()))
@@ -200,17 +244,35 @@ namespace EncryptMessangerClient
                                     {                                       
                                         throw new Exception("Невозможно расшифровать входящее сообщение. Сессия не найдена.");
                                     }
+                                    string text;
                                     foreach (MessageSendibleInfo info in messagesInfo)
                                     {
                                         //Debug.WriteLine("Load message signature: " + Encoding.UTF8.GetString(info.Signature));
                                         //Debug.WriteLine("Load message text: " + Encoding.UTF8.GetString(info.Text));
-                                        if (!info.HasAttach)
+                                        try
                                         {
-                                            args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
+                                            if (!info.HasAttach)
+                                            {                                            
+                                                text = Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text));
+                                                args.AddMessage(info.MessageId, info.AuthorId, text, info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId));
+                                            }
+                                            else
+                                            {
+                                                args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId);
+                                            }
                                         }
-                                        else
+                                        catch (System.Security.Cryptography.CryptographicException)
                                         {
-                                            args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId);
+                                            text = "";
+                                            if (!info.HasAttach)
+                                            {
+                                                args.AddMessage(info.MessageId, info.AuthorId, text, info.SendTime, !dialogSession.VerifyData(info.Text, info.Signature, info.AuthorId), "Не удается расшифровать сообщение.");
+                                            }
+                                            else
+                                            {
+                                                args.AddMessage(info.MessageId, info.AuthorId, Encoding.UTF8.GetString(dialogSession.Dectypt(info.Text)), info.SendTime, false, info.AttachId, "Не удается расшифровать сообщение.");
+
+                                            }
                                         }
                                     }
                                     MessagesInfoReceived?.Invoke(this, args);
@@ -222,6 +284,12 @@ namespace EncryptMessangerClient
                             {
                                 SearchUserResponceMessage responce = newMessage as SearchUserResponceMessage;
                                 UserFind?.Invoke(this, new DialogUserInfoReceivedEventArgs(responce.UserId, responce.Login, responce.State));
+                                break;
+                            }
+                        case MessageType.MessageDeletedMessage:
+                            {
+                                MessageDeletedMessage deletedMessage = newMessage as MessageDeletedMessage; 
+                                MessageDeleted?.Invoke(this, new MessageDeletedEventArgs(deletedMessage.MessageId));
                                 break;
                             }
                         case MessageType.DialogCreatedMessage:
@@ -266,10 +334,23 @@ namespace EncryptMessangerClient
             EncryptionProvider encryptionProvider = new EncryptionProvider();
             encryptionProvider.ClientServerEncrypt(_messageWriter, _messageReder);
         }
-        private void OnResiveMessages(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered)
+        private void OnResiveMessages(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered, string error = "")
         {
-
-            Resive?.Invoke(this, new NewMessageEventArgs(messageId, message, dialogId, from, sendDate, isAltered));
+            NewMessageEventArgs args = new NewMessageEventArgs(messageId, message, dialogId, from, sendDate, isAltered);
+            if (!String.IsNullOrEmpty(error))
+            {
+                args.Error = error;
+            }
+            Resive?.Invoke(this, args);
+        }
+        private void OnResiveMessages(long messageId, string message, long dialogId, long from, DateTime sendDate, bool isAltered, long attachId, string error = "")
+        {
+            NewMessageEventArgs args = new NewMessageEventArgs(messageId, message, dialogId, from, sendDate, isAltered, attachId);
+            if(!String.IsNullOrEmpty(error))
+            {
+                args.Error = error;
+            }
+            Resive?.Invoke(this, args);
         }
         public void SendMessage(string message, long dialogId)
         {
@@ -547,6 +628,10 @@ namespace EncryptMessangerClient
         public void CreateDialog(long creatorId, long[] membersId, string dialogName)
         {
             _messageWriter.WriteMessage(new CreateDialogRequestMessage(creatorId, membersId, dialogName));
+        }
+        public void DeleteMessage(long messageId)
+        {
+            _messageWriter.WriteMessage(new DeleteMessageRequest(messageId));
         }
         public void Stop()
         {

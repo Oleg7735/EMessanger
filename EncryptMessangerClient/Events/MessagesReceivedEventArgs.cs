@@ -88,14 +88,23 @@ namespace EncryptMessangerClient.Events
             Dialog = dialogId;
         }
 
-        public void AddMessage(long messageId, long authorId, string text, DateTime sendTime, bool isAltered)
+        public void AddMessage(long messageId, long authorId, string text, DateTime sendTime, bool isAltered, string error = "")
         {
-            _messages.Add(new DialogMessage(new UserInfo(authorId), messageId, text, sendTime, isAltered, null));
+            DialogMessage message = new DialogMessage(new UserInfo(authorId), messageId, text, sendTime, isAltered, null);
+            if(! String.IsNullOrEmpty(error))
+            {
+                message.SetError(error);
+            }
+            _messages.Add(message);
         }
-        public void AddMessage(long messageId, long authorId, string text, DateTime sendTime, bool isAltered, long attachId)
+        public void AddMessage(long messageId, long authorId, string text, DateTime sendTime, bool isAltered, long attachId, string error = "")
         {
             DialogMessage message = new DialogMessage(new UserInfo(authorId), messageId, text, sendTime, isAltered, null);
             message.AddAttachment(attachId);
+            if (!String.IsNullOrEmpty(error))
+            {
+                message.SetError(error);
+            }
             _messages.Add(message);
         }
         internal DialogMessage[] GetDialogMessages()

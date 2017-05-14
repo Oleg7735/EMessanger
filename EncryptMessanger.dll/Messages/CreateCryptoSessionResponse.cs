@@ -30,10 +30,36 @@ namespace EncryptMessanger.dll.Messages
             To = receiverId;
             From = senderId;
             Response = assept;
+            
+        }
+        public CreateCryptoSessionResponse(long dialogId, string error)
+        {
+            _type = MessageType.CreateCryptoSessionResponse;
+            Error = error;
+            Response = false;
+            Dialog = dialogId;
         }
         public CreateCryptoSessionResponse()
         {
             _type = MessageType.CreateCryptoSessionResponse;            
+        }
+        public string Error
+        {
+            get
+            {
+                try
+                {
+                    return Encoding.UTF8.GetString(GetAttribute(Atribute.Error));
+                }
+                catch(Exception)
+                {
+                    return "";
+                }
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.Error, Encoding.UTF8.GetBytes(value)));
+            }
         }
     }
 }
