@@ -414,11 +414,12 @@ namespace EncryptMessangerClient
         {
             _registrationViewModel.Error = e.ErrorDescription;
         }
-        private void OnRegistrationSuccess(Object sender, RegistrationSuccessEventArgs e)
+        private async void OnRegistrationSuccess(Object sender, RegistrationSuccessEventArgs e)
         {
             _registrationWindow.Hide();
             _logInForm.Hide();
             StartMainWindow(e.Login, e.Id);
+            await _client.StartAsync();
         }
         //событие запроса на регистрацию на сервере от RegistrationViewModel
         private void OnRegistration(object sender, ClientRegistrationEventArgs e)

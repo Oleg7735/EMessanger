@@ -190,11 +190,11 @@ namespace EncryptMessangerClient
                                     text = "";
                                     if (!newTextMessage.HasAttach)
                                     {
-                                        OnResiveMessages(newTextMessage.MessageId, text, newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, !session.VerifyData(newTextMessage.byteText, newTextMessage.GetSignature(), newTextMessage.From), "Не удалось расшифровать данное сообщение!");
+                                        OnResiveMessages(newTextMessage.MessageId, text, newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, false, "Не удалось расшифровать данное сообщение!");
                                     }
                                     else
                                     {
-                                        OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, false, newTextMessage.AttachId);
+                                        OnResiveMessages(newTextMessage.MessageId, Encoding.UTF8.GetString(session.Dectypt(newTextMessage.byteText)), newTextMessage.Dialog, newTextMessage.From, newTextMessage.SendDate, false, newTextMessage.AttachId, "Не удалось расшифровать данное сообщение!");
                                     }
                                 }
                                 
