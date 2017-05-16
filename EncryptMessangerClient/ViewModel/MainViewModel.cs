@@ -158,10 +158,11 @@ namespace EncryptMessangerClient.ViewModel
             }
             containerDialog.SortMessages();
             OnPropertyChanged("Messages");
-            if(containerDialog.DialogMessages.Count == messages.Length)
-            {
-                ScrollMessages?.Invoke(this, EventArgs.Empty);
-            }
+            //if(containerDialog.DialogMessages.Count == messages.Length)
+            //{
+            //прокручиваем к первому полученному
+                ScrollMessages?.Invoke(this, new ScrollMessagesEventArgs(messages.Length));
+            //}
         }
         public void AddMessage(long messageId, long interlocutor, long dialog, DateTime sendDate, string text, bool isAltered, string error = "")
         {
@@ -283,7 +284,7 @@ namespace EncryptMessangerClient.ViewModel
         public event EventHandler<LoadFileEventArgs> FileLoad;
         public event EventHandler<DeleteProgressEventArgs> DeleteProgress;
         public event EventHandler<SearchUserEventArgs> SearchUserHandler;
-        public event EventHandler ScrollMessages;
+        public event EventHandler <ScrollMessagesEventArgs> ScrollMessages;
         public event EventHandler<CreateDialogEventArgs> CreateDialogHandler;
         public event EventHandler<DeleteMessageEventArgs> DeleteMessageHandler;
 
@@ -365,6 +366,10 @@ namespace EncryptMessangerClient.ViewModel
         }
         private bool CanCreateDialog()
         {
+            if(FindUserSelectedIndex < 0)
+            {
+                return false;
+            }
             if(String.IsNullOrEmpty(_createDialogName))
             {
                 return false;
@@ -680,6 +685,7 @@ namespace EncryptMessangerClient.ViewModel
                 {
                     _findUserSelectedIndex = value;
                     OnPropertyChanged();
+                    CreateDialogCommand.RaiseCanExecuteChanged();
                 }
             }
         }

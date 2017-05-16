@@ -48,6 +48,7 @@ namespace EncryptMessanger.dll.FileTransfer
                         {
                             fileStream.Close();
                             reader.Close();
+                            client.Close();
                             return ((EndFileMessage)newMessage).Signature;
                         }
                 }
@@ -130,6 +131,7 @@ namespace EncryptMessanger.dll.FileTransfer
                         {
                             fileStream.Close();
                             reader.Close();
+                            client.Close();
                             return ((EndFileMessage)newMessage).Signature;
                         }
                 }

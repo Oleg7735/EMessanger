@@ -112,6 +112,7 @@
     <Compile Include="Events\NewMessageEventArgs.cs" />
     <Compile Include="Events\RegistrationErrorEventArgs.cs" />
     <Compile Include="Events\RegistrationSuccessEventArgs.cs" />
+    <Compile Include="Events\ScrollMessagesEventArgs.cs" />
     <Compile Include="Events\SearchUserEventArgs.cs" />
     <Compile Include="Events\SendFileEventArgs.cs" />
     <Compile Include="Events\UpdateDialogEncryptionKeysEventArgs.cs" />

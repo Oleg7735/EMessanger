@@ -18,6 +18,7 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using EncryptMessangerClient.ViewModel;
+using EncryptMessangerClient.Events;
 
 namespace EncryptMessangerClient
 {
@@ -94,7 +95,7 @@ namespace EncryptMessangerClient
            // xsender.Shutdown(SocketShutdown.Both);
            // xsender.Close();*/
         }
-        private void OnScrollMessagesToEnd(object sender, EventArgs args)
+        private void OnScrollMessagesToEnd(object sender, ScrollMessagesEventArgs args)
         {
             Decorator border = VisualTreeHelper.GetChild(messagesListBox, 0) as Decorator;
             if (border != null)
@@ -107,6 +108,12 @@ namespace EncryptMessangerClient
                     //double center = scrollViewer.ScrollableHeight / 2.0;
                     //scrollViewer.ScrollToVerticalOffset(center);
                     scrollViewer.ScrollToEnd();
+                    //Если загружены сообщения более одного раза 
+                    if(args.ItemIndex < messagesListBox.Items.Count)
+                    {
+                        messagesListBox.ScrollIntoView(messagesListBox.Items[args.ItemIndex]);
+                    }
+                    //messagesListBox.ScrollIntoView(messagesListBox.Items[messagesListBox.Items.Count - 1]);
                     
                 }
             }

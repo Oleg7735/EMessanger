@@ -57,7 +57,7 @@
                 <RowDefinition  Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
             
-            <ListBox  Grid.Row="0" x:Name="messagesListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Messages}" SelectedIndex="{Binding SelectedMessageIndex}">
+            <ListBox  Grid.Row="0" ScrollViewer.CanContentScroll="False" x:Name="messagesListBox" HorizontalAlignment="Stretch"  Margin="5,5,5,5" VerticalAlignment="Stretch"  Grid.Column="0" ItemsSource="{Binding Messages}" SelectedIndex="{Binding SelectedMessageIndex}">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Удалить" Command="{Binding DeleteMessageCommand}"></MenuItem>

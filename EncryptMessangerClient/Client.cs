@@ -35,6 +35,8 @@ namespace EncryptMessangerClient
         private int _clientClientEncryptionPort = 11002;
         private const int _fileSendPortStartIndex = 11100;
         private const int _fileSendPortEndIndex = 11110;
+        private const int _fileReceivePortStartIndex = 11111;
+        private const int _fileReceivePortEndIndex = 11120;
         private TcpClient _client = new TcpClient();
         private MessageWriter _messageWriter;
         private MessageReader _messageReder;
@@ -422,16 +424,16 @@ namespace EncryptMessangerClient
 
             return ipv4Adreses[ipv4Adreses.Length - 1];
         }
-        private int GetFreePort()
+        private int GetFreePort(int startIndex, int endIndex)
         {
             
             IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
             IPEndPoint[] tcpEndPoints = properties.GetActiveTcpListeners();
-
+            
             List<int> usedPorts = tcpEndPoints.Select(p => p.Port).ToList<int>();
             int unusedPort = 0;
 
-            for (int port = _fileSendPortStartIndex; port < _fileSendPortEndIndex; port++)
+            for (int port = startIndex; port < endIndex; port++)
             {
                 if (!usedPorts.Contains(port))
                 {
@@ -601,7 +603,7 @@ namespace EncryptMessangerClient
         public void SendFile(long dialogId, long senderId, string path, string name, UpdateProgressBarDelegate updateDelegate = null)
         {
             IPAddress clientAdress = GetClientIp();
-            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort());
+            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort(_fileSendPortStartIndex, _fileSendPortEndIndex));
             FileSender fileSender = new FileSender();
             if(updateDelegate != null)
             {
@@ -614,7 +616,7 @@ namespace EncryptMessangerClient
         public void ReceiveFile(long dialogId, long attachId, string saveFileName)
         {
             IPAddress clientAdress = GetClientIp();
-            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort());
+            IPEndPoint point = new IPEndPoint(clientAdress, GetFreePort(_fileReceivePortStartIndex, _fileReceivePortEndIndex));
             FileReceiver receiver = new FileReceiver();
 
             ClientClientEncryptedSession session = FindSession(dialogId);
