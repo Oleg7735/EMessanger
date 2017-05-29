@@ -88,7 +88,7 @@ namespace EncryptMessanger.dll.Encription
         //}
         public void Save(string fileName, long ownerId, ClientClientEncryptedSession session)
         {
-            //сохраняем Rsa приватный ключ жля подписи
+            //сохраняем Rsa приватный ключ для подписи
             CspParameters cspSign = new CspParameters();
             cspSign.KeyContainerName = EncriptionParams.GetSignKeyContainerName(session.Dialog, ownerId);
             RSACryptoServiceProvider signRsa = new RSACryptoServiceProvider(cspSign);

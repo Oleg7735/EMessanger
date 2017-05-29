@@ -22,9 +22,10 @@ namespace EncryptMessangerClient
         public ClientClientEncryptedSession LoadSession(long dialogId)
         {
             ClientClientEncryptedSession session = _io.LoadSession(dialogId, _clientId, _fileName);
-            _sessions.Add(session);
+            _sessions.Add(session);           
             return session;
         }
+        
         public ClientClientEncryptedSession FindSession(long dialogId)
         {
             for (int i = 0; i < _sessions.Count; i++)

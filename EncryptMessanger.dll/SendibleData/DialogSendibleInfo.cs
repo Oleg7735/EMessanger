@@ -10,19 +10,22 @@ namespace EncryptMessanger.dll.SendibleData
      public class DialogSendibleInfo : ISendibleData
     {
         private long _dialogId;
+        private long _creatorId;
         private string _dialogName;
         private DateTime _creationTime;
         private bool _encryptMessages;
         private bool _signMessages;
         private long[] _membersId;
 
-        public DialogSendibleInfo(long dialogId, string dialogName, DateTime creationTime, bool encryptMessages, bool signMessages, long[] membersId)
+
+        public DialogSendibleInfo(long dialogId, string dialogName, DateTime creationTime, bool encryptMessages, bool signMessages, long creatorId, long[] membersId)
         {
             _dialogId = dialogId;
             _dialogName = dialogName;
             _creationTime = creationTime;
             _encryptMessages = encryptMessages;
             _signMessages = signMessages;
+            CreatorId = creatorId;
             MembersId = membersId;
         }
         public long DialogId
@@ -103,6 +106,19 @@ namespace EncryptMessanger.dll.SendibleData
             }
         }
 
+        public long CreatorId
+        {
+            get
+            {
+                return _creatorId;
+            }
+
+            set
+            {
+                _creatorId = value;
+            }
+        }
+
         public DialogSendibleInfo()
         {
 
@@ -123,6 +139,8 @@ namespace EncryptMessanger.dll.SendibleData
             ms.Read(encryptMessagesBytes, 0, 1);
             byte[] signMessagesBytes = new byte[1];
             ms.Read(signMessagesBytes, 0, 1);
+            byte[] creatorIdBytes = new byte[8];
+            ms.Read(creatorIdBytes, 0, 8);
             byte[] membersIdLengthBytes = new byte[4];
             ms.Read(membersIdLengthBytes, 0, 4);
             int membersIdlength = BitConverter.ToInt32(membersIdLengthBytes, 0);
@@ -140,6 +158,7 @@ namespace EncryptMessanger.dll.SendibleData
             EncryptMessages = BitConverter.ToBoolean(encryptMessagesBytes, 0);
             SignMessages = BitConverter.ToBoolean(signMessagesBytes, 0);
             DialogName = Encoding.UTF8.GetString(dialogNameBytes);
+            CreatorId = BitConverter.ToInt64(creatorIdBytes, 0);
 
             int offset = 0;
             _membersId = new long[membersIdBytes.Length/8];
@@ -161,6 +180,7 @@ namespace EncryptMessanger.dll.SendibleData
             byte[] signMessagesBytes = BitConverter.GetBytes(SignMessages);
             
             byte[] membersIdBytes = new byte[_membersId.Length * 8];
+            byte[] creatorIdBytes = BitConverter.GetBytes(CreatorId);
 
             byte[] buffer;
             
@@ -176,8 +196,9 @@ namespace EncryptMessanger.dll.SendibleData
             byte[] result = idBytes.Concat(timeBytes).ToArray();
             result = result.Concat(encryptMessagesBytes).ToArray();
             result = result.Concat(signMessagesBytes).ToArray();
+            result = result.Concat(creatorIdBytes).ToArray();
             result = result.Concat(membersIdLengthBytes).ToArray();
-            result = result.Concat(membersIdBytes).ToArray();
+            result = result.Concat(membersIdBytes).ToArray();            
             result = result.Concat(nameLengthBytes).ToArray();
             result = result.Concat(nameBytes).ToArray();
                         

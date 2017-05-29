@@ -15,7 +15,8 @@ namespace EncryptMessanger.dll.SendibleData
         private long _authorId;
         private long _dialogId;
         private long _messageId;
-
+        private bool _signed;
+        private bool _encrypted;
         private bool _hasAttach = false;
         private long _attachId;
         //private byte[] _attachName;
@@ -28,13 +29,14 @@ namespace EncryptMessanger.dll.SendibleData
         {
             FillFromBytes(messageInfoBytes);
         }
-        public MessageSendibleInfo(long messageId, long dialogId, long userId, DateTime sendTime, byte[] messageText)
+        public MessageSendibleInfo(long messageId, long dialogId, long userId, DateTime sendTime, byte[] messageText, bool encrypted)
         {
             DialogId = dialogId;
             AuthorId = userId;
             SendTime = sendTime;
             Text = messageText;
             MessageId = messageId;
+            Encrypted = encrypted;
             //Signature = signature;
 
         }
@@ -105,6 +107,7 @@ namespace EncryptMessanger.dll.SendibleData
             set
             {
                 _signature = value;
+                Signed = true;
             }
         }
 
@@ -144,6 +147,32 @@ namespace EncryptMessanger.dll.SendibleData
             set
             {
                 _messageId = value;
+            }
+        }
+
+        public bool Signed
+        {
+            get
+            {
+                return _signed;
+            }
+
+            set
+            {
+                _signed = value;
+            }
+        }
+
+        public bool Encrypted
+        {
+            get
+            {
+                return _encrypted;
+            }
+
+            set
+            {
+                _encrypted = value;
             }
         }
 
@@ -189,11 +218,17 @@ namespace EncryptMessanger.dll.SendibleData
                 _signature = new byte[signatureLength];
                 ms.Read(_signature, 0, signatureLength);
             }
+            byte[] encryptedFlagBytes = new byte[1];
+            ms.Read(encryptedFlagBytes, 0, 1);            
+            byte[] signedFlagBytes = new byte[1];
+            ms.Read(signedFlagBytes, 0, 1);
 
             DialogId = BitConverter.ToInt64(dialogBytes, 0);
             AuthorId = BitConverter.ToInt64(userBytes, 0);
             SendTime = DateTime.FromBinary(BitConverter.ToInt64(dateBytes, 0));
             MessageId = BitConverter.ToInt64(messageIdBytes, 0);
+            Encrypted = BitConverter.ToBoolean(encryptedFlagBytes, 0);
+            Signed = BitConverter.ToBoolean(signedFlagBytes, 0);
         }
         public void AddAttach(long attachId)
         {
@@ -219,6 +254,8 @@ namespace EncryptMessanger.dll.SendibleData
             byte[] dateBytes = BitConverter.GetBytes(binaryData);
             byte[] userBytes = BitConverter.GetBytes(_authorId);
             byte[] dialogBytes = BitConverter.GetBytes(_dialogId);
+            byte[] encryptedFlagBytes = BitConverter.GetBytes(Encrypted);
+            byte[] signedFlagBytes = BitConverter.GetBytes(Signed);
 
             byte[] resultBytes;
             if(_hasAttach)
@@ -242,6 +279,8 @@ namespace EncryptMessanger.dll.SendibleData
             {
                 resultBytes = resultBytes.Concat(_signature).ToArray();
             }
+            resultBytes = resultBytes.Concat(encryptedFlagBytes).ToArray();
+            resultBytes = resultBytes.Concat(signedFlagBytes).ToArray();
             return resultBytes;
 
         }

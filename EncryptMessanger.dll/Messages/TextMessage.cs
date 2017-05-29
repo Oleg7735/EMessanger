@@ -52,6 +52,8 @@ namespace EncryptMessanger.dll.Messages
         }
         public TextMessage()
         {
+            Signed = false;
+            Encrypted = false;
             init();
         }
         public TextMessage(long from, long dialog, string text)
@@ -59,6 +61,7 @@ namespace EncryptMessanger.dll.Messages
             init();
             SetAtributeValue(new MessageAtribute(Atribute.DialogId, BitConverter.GetBytes(dialog)));
             SetAtributeValue(new MessageAtribute(Atribute.From, BitConverter.GetBytes(from)));
+            
             //_atributes.Add(new MessageAtribute(Atribute.To, Encoding.UTF8.GetBytes(to)));
             //_atributes.Add(new MessageAtribute(Atribute.From, Encoding.UTF8.GetBytes(from)));
             _atributes.Add(new MessageAtribute(Atribute.Text, Encoding.UTF8.GetBytes(text)));
@@ -84,6 +87,7 @@ namespace EncryptMessanger.dll.Messages
         public void AddSignature(byte[] signature)
         {
             _atributes.Add(new MessageAtribute(Atribute.Signature,signature));
+            Signed = true;
         }
         public byte[] GetSignature()
         {
@@ -147,9 +151,31 @@ namespace EncryptMessanger.dll.Messages
                 SetAtributeValue(new MessageAtribute(Atribute.MessageId, BitConverter.GetBytes(value)));
             }
         }
+        public bool Signed
+        {
+            get
+            {
+                return BitConverter.ToBoolean(GetAttribute(Atribute.Signed), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.Signed, BitConverter.GetBytes(value)));
+            }
+        }
+        public bool Encrypted
+        {
+            get
+            {
+                return BitConverter.ToBoolean(GetAttribute(Atribute.Encrypted), 0);
+            }
+            set
+            {
+                SetAtributeValue(new MessageAtribute(Atribute.Encrypted, BitConverter.GetBytes(value)));
+            }
+        }
         public override string ToString()
         {
-            return "Text message from user " + From + " to dalog" + Dialog + " text = " + Text + " Signature = " + Encoding.UTF8.GetString(GetSignature());
+            return "Text message from user" + From + " to dialog" + Dialog + " text = " + Text + " Signature = " + Encoding.UTF8.GetString(GetSignature());
         }
     }
 }

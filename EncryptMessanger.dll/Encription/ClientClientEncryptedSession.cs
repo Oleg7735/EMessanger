@@ -61,14 +61,13 @@ namespace EncryptMessanger.dll.Encription
         }
         public byte[] Dectypt(byte[] data)
         {
-            if (UseEncryption)
-            {
+            //if (UseEncryption)
+            //{
                 ICryptoTransform decryptor = _aes.CreateDecryptor();
-                byte[] decryptedData = decryptor.TransformFinalBlock(data, 0, data.Length);
-                
+                byte[] decryptedData = decryptor.TransformFinalBlock(data, 0, data.Length);                
                 return decryptedData;
-            }
-            return data;
+            //}
+            //return data;
         }
         /// <summary>
         /// Метод, подготавливающий сессию к новому сеансу потокового шифроваия с помощью метода EncryptAsStream
@@ -90,11 +89,8 @@ namespace EncryptMessanger.dll.Encription
 
         public byte[] Encrypt(byte[] data)
         {
-            //byte[] startIV = _aes.IV;
             ICryptoTransform encryptor = _aes.CreateEncryptor();
             byte[] encryptedData = encryptor.TransformFinalBlock(data, 0, data.Length);
-            
-            //_aes.IV = startIV;
             return encryptedData;
         }
         public ICryptoTransform GetEncryptor()
@@ -106,8 +102,7 @@ namespace EncryptMessanger.dll.Encription
             return _aes.CreateDecryptor();
         }
         public byte[] CreateSign(byte[] data)
-        {
-            
+        {            
             return _rsaToSign.SignData(data, md5);
         }
         /// <summary>
@@ -119,11 +114,11 @@ namespace EncryptMessanger.dll.Encription
         /// <returns></returns>
         public bool VerifyData(byte[] data, byte[] signature, long authorId)
         {
-            if (UseSignature)
-            {                
+            //if (UseSignature)
+            //{                
                 return GetVerificationRsa(authorId).VerifyData(data, md5, signature.Take(128).ToArray());
-            }
-            return true;
+            //}
+            //return true;
         }
         public void ExportKeys(string fileName, long ownerId)
         {
@@ -269,11 +264,13 @@ namespace EncryptMessanger.dll.Encription
         {
             if (UseEncryption)
             {               
-                message.byteText = Encrypt(message.byteText);               
+                message.byteText = Encrypt(message.byteText);
+                message.Encrypted = true;           
             }
             if(UseSignature)
             {
                 message.AddSignature(CreateSign(message.byteText));
+                message.Signed = true;
             }
         }
         public byte[] IV

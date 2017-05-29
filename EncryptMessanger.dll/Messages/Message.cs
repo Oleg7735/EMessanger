@@ -28,7 +28,7 @@ public enum Atribute
     Key, To, From, Text, IV, Login, Password, Response, Signature, Clients,
     UseEncryption, UseSignature, DialogInfo, UserId, Count, Offset, DialogId, MessageInfo, DateTime, IP,
     Port, BinaryData, Name, HasAttach, AttachName, AttachId, UserState, CreatorId, MemberId, DialogName,
-    ResponceState, Error, MessageId
+    ResponceState, Error, MessageId, Signed, Encrypted
 };
 
 namespace EncryptMessanger.dll.Messages

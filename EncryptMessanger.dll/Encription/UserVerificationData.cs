@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace EncryptMessanger.dll.Encription
 {
+    /// <summary>
+    /// Инкапсулирует информацию о ключах для верификации ЭЦП.
+    /// </summary>
     public class UserVerificationData
     {
         private long _userID;

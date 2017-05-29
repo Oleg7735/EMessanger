@@ -18,6 +18,7 @@ namespace EncryptMessangerClient.Model
         private string _dialogName;
         private string _sessionErrorMessage;
         private bool _sessionError;
+        private long _creatorId;
         //public bool _showError = false;
         private ObservableCollection<DialogMessage> _dialogMessages = new ObservableCollection<DialogMessage>();
         public ObservableCollection<DialogMessage> DialogMessages
@@ -105,12 +106,13 @@ namespace EncryptMessangerClient.Model
         {
             _dialogName = name;
         }
-        public Dialog(string name, long dialogId, bool encrypt, bool sign, long[] membersId)
+        public Dialog(string name, long dialogId, bool encrypt, bool sign, long creatorId, long[] membersId)
         {
             _dialogName = name;
             DialogId = dialogId;
             _encrypt = encrypt;
             _sign = sign;
+            _creatorId = creatorId;
             MembersId = membersId;
         }
 
@@ -160,6 +162,19 @@ namespace EncryptMessangerClient.Model
             {
                 _sessionError = value;                
                 OnPropertyChanged();
+            }
+        }
+
+        public long CreatorId
+        {
+            get
+            {
+                return _creatorId;
+            }
+
+            set
+            {
+                _creatorId = value;
             }
         }
 

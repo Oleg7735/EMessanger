@@ -404,8 +404,8 @@ namespace EncryptMessangerClient
             {
                 Dispatcher.Invoke(() =>
                 {
-                    vm.SetDialogEncryptSetting(e.Encrypt);
-                    vm.SetDialogSignSetting(e.Sign);
+                    vm.SetDialogEncryptSetting(e.Dialog, e.Encrypt);
+                    vm.SetDialogSignSetting(e.Dialog, e.Sign);
                 });
             }
         }
@@ -466,7 +466,7 @@ namespace EncryptMessangerClient
                     {
                         foreach (DialogSendibleInfo d in args.Dialogs)
                         {
-                            vm.AddDialog(new Dialog(d.DialogName, d.DialogId, d.EncryptMessages, d.SignMessages, d.MembersId));
+                            vm.AddDialog(new Dialog(d.DialogName, d.DialogId, d.EncryptMessages, d.SignMessages, d.CreatorId, d.MembersId));
                         }
                     });
                 }
@@ -498,7 +498,7 @@ namespace EncryptMessangerClient
         }
         private void OnLoadDialogSession(object sender, LoadDialogSessionEventArgs args)
         {
-            _client.LoadSession(args.DialogId);
+            _client.LoadSessionAndSetEncryptionSettings(args.DialogId, args.EncryptMessages, args.SignMessages);
         }
         private void OnLoadDialogMessages(object sender, LoadDialogMessagesEventArgs args)
         {

@@ -117,6 +117,11 @@ namespace EncryptMessangerClient.ViewModel
                     EncryptSessionCommand.RaiseCanExecuteChanged();
                     UpdateDialogEncryptionKeysCommand.RaiseCanExecuteChanged();
                     SendFileCommand.RaiseCanExecuteChanged();
+
+                    Encrypt = CurrentDialog.Encrypt;
+                    Sign = CurrentDialog.Sign;
+                    OnPropertyChanged("Encrypt");
+                    OnPropertyChanged("Sign");
                 }
             }
         }
@@ -450,8 +455,7 @@ namespace EncryptMessangerClient.ViewModel
         }
         private bool CanEditEncryptionSetting()
         {
-            return CurrentDialog != null;
-
+            return CurrentDialog != null && CurrentDialog.CreatorId == CurrentUserId;
         }
         private bool CanUpdateDialogEncryptionKeys()
         {
@@ -474,9 +478,9 @@ namespace EncryptMessangerClient.ViewModel
         }
         
 
-        private void _loadSessionForDialog(long dialogId)
+        private void _loadSessionForDialog(long dialogId, bool encryptMessages, bool signMessages)
         {
-            LoadDialogSession?.Invoke(this, new LoadDialogSessionEventArgs(dialogId));
+            LoadDialogSession?.Invoke(this, new LoadDialogSessionEventArgs(dialogId, encryptMessages, signMessages));
         }
 
         private void OpenDialogCreation()
@@ -535,15 +539,23 @@ namespace EncryptMessangerClient.ViewModel
             }
             throw new NullReferenceException("Диалог "+ login+" не найден в списке диалогов");
         }
-        public void SetDialogSignSetting(bool isSign)
+        public void SetDialogSignSetting(long dialogId, bool isSign)
         {
-            _currentDialog.Sign = isSign;
-            OnPropertyChanged("Sign");
+            Dialog dialog = Dialogs.Where(d => d.DialogId == dialogId).FirstOrDefault();
+            if (dialog != null)
+            {
+                _currentDialog.Sign = isSign;
+                OnPropertyChanged("Sign");
+            }
         }
-        public void SetDialogEncryptSetting(bool isEncrypt)
+        public void SetDialogEncryptSetting(long dialogId, bool isEncrypt)
         {
-            _currentDialog.Encrypt = isEncrypt;
-            OnPropertyChanged("Encrypt");
+            Dialog dialog = Dialogs.Where(d => d.DialogId == dialogId).FirstOrDefault();
+            if (dialog != null)
+            {
+                _currentDialog.Encrypt = isEncrypt;
+                OnPropertyChanged("Encrypt");
+            }
         }
         public void AddContact(UserInfo userInfo)
         {
@@ -567,8 +579,7 @@ namespace EncryptMessangerClient.ViewModel
                 else
                 {
                     return true;
-                }
-                
+                }                
             }
             set
             {
@@ -793,7 +804,7 @@ namespace EncryptMessangerClient.ViewModel
             if (!_dialogs.Contains(dialog))
             {
                 _dialogs.Add(dialog);
-                _loadSessionForDialog(dialog.DialogId);
+                _loadSessionForDialog(dialog.DialogId, dialog.Encrypt, dialog.Sign);
             }
         }
         public void OnDialogSessionFaild(object sender, DialogSessionFaildEventArgs arg)

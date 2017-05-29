@@ -9,9 +9,13 @@ namespace EncryptMessangerClient.Events
     class LoadDialogSessionEventArgs:EventArgs
     {
         private long _dialogId;
-        public LoadDialogSessionEventArgs(long dialogId)
+        private bool _encryptMessages;
+        private bool _signMessages;
+        public LoadDialogSessionEventArgs(long dialogId, bool encryptMessages, bool signMessages)
         {
             DialogId = dialogId;
+            EncryptMessages = encryptMessages;
+            SignMessages = signMessages;
         }
 
         public long DialogId
@@ -24,6 +28,32 @@ namespace EncryptMessangerClient.Events
             set
             {
                 _dialogId = value;
+            }
+        }
+
+        public bool EncryptMessages
+        {
+            get
+            {
+                return _encryptMessages;
+            }
+
+            set
+            {
+                _encryptMessages = value;
+            }
+        }
+
+        public bool SignMessages
+        {
+            get
+            {
+                return _signMessages;
+            }
+
+            set
+            {
+                _signMessages = value;
             }
         }
     }
